@@ -6,25 +6,28 @@ UX discovery partner for designers. Turns a raw PM PRD into a KB-grounded `ux-on
 
 ## Installation
 
-### Local Clone (recommended for development)
+### Marketplace (recommended)
 
 ```bash
-claude plugin add "/Users/GuanchengDing/Claude Code-works/AI-projects/Design-partner"
+claude plugin marketplace add Pawn-97/UX-partner
+claude plugin install --scope user ux-project
+```
+
+### Local Clone (for development)
+
+```bash
+git clone git@github.com:Pawn-97/UX-partner.git
+cd UX-partner
+claude plugin add "$(pwd)"
 ```
 
 After install, restart Claude Code (or reload plugins). The skill auto-triggers on UX-discovery keywords; the slash commands appear under `/ux-project:*`.
-
-### Marketplace
-
-```bash
-claude plugin marketplace add /path/to/Design-partner
-claude plugin install --scope user ux-project
-```
 
 ## Slash Commands
 
 | Command | Purpose |
 |---|---|
+| `/ux-project:setup-kb <kb-path>` | One-shot KB setup: classify + index every markdown file into context-mode (idempotent) |
 | `/ux-project:start <project-name> <prd-path>` | Initialize project workspace, copy PRD, run KB analysis |
 | `/ux-project:resume <project-name>` | Restore project context from `state.md` (gateway file) |
 | `/ux-project:onepage` | Generate `ux-onepage.md` (cite-check + outdated-check enforced; designer must approve) |

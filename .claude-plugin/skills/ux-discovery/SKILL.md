@@ -161,6 +161,7 @@ Use this sequence as the default rhythm — adjust based on what the designer sa
 
 | Command | Purpose |
 |---|---|
+| `/ux-project:setup-kb <kb-path>` | One-shot KB indexing: classify + ctx_index every markdown file (idempotent) |
 | `/ux-project:start <name> <prd-path>` | Initialize project workspace from PRD |
 | `/ux-project:resume <name>` | Restore project context (reads state.md only) |
 | `/ux-project:onepage` | Generate ux-onepage.md (after cite-check + designer approval) |

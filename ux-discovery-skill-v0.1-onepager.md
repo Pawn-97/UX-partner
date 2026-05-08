@@ -326,7 +326,7 @@ walkAllMarkdown(KB_ROOT).forEach(file => {
 
 ### v0.1 必须有
 - [x] SKILL.md
-- [x] 4 个 slash commands（`start` / `resume` / `onepage` / `handoff`）
+- [x] 5 个 slash commands（`setup-kb` / `start` / `resume` / `onepage` / `handoff`）
 - [x] 7 份模板（pm-source / state / decisions / assumptions / questions / onepage / brief）
 - [x] cite-or-die 强制逻辑
 - [x] **PRD 时间有效性 frontmatter**（`prd_version` / `valid_from` / `valid_to` / `superseded_by`）

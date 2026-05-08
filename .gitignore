@@ -8,6 +8,7 @@
 # Generated KB index artifacts (user-specific paths, regeneratable)
 /kb-classification.md
 /kb-index-manifest.json
+/.kb-setup-stamp
 
 # Editor / IDE
 .vscode/

@@ -61,39 +61,42 @@ Designers receive PRDs that often jump straight to a UI solution before the unde
 
 ## Install
 
-### One-time setup
+### Option A — Marketplace (recommended)
 
 ```bash
-# 1. Clone the repo
+claude plugin marketplace add Pawn-97/UX-partner
+claude plugin install --scope user ux-project
+```
+
+Restart Claude Code. The `ux-discovery` skill auto-triggers on phrases like "需求拆解 / JTBD 梳理 / PRD 分析 / ux discovery", and the `/ux-project:*` slash commands appear in the menu.
+
+### Option B — Local clone (for development)
+
+```bash
 git clone git@github.com:Pawn-97/UX-partner.git "Design-partner"
 cd "Design-partner"
-
-# 2. Register the plugin with Claude Code
 claude plugin add "$(pwd)"
-
-# 3. Restart Claude Code
 ```
 
-After install, the `ux-discovery` skill auto-triggers on phrases like "需求拆解 / JTBD 梳理 / PRD 分析 / ux discovery", and the four `/ux-project:*` slash commands appear in the menu.
+Restart Claude Code.
 
-### Index your KB (one-time)
+### Index your KB (one-shot)
 
-If you have an existing markdown KB you want to ground onepage citations in:
+In Claude Code:
 
-```bash
-node .claude-plugin/scripts/index-to-context-mode.js "/path/to/your/KB"
+```
+/ux-project:setup-kb /path/to/your/KB
 ```
 
-The script walks the KB, classifies each file by `source_quality`, and emits `kb-classification.md` + `kb-index-manifest.json` (both `.gitignore`d). Then ask Claude (in this directory) to do the actual indexing:
+This classifies every markdown file in your KB by `source_quality`, then indexes each into `context-mode` so onepage citations have something to ground in. Idempotent — safe to re-run after KB changes.
 
-> "Read `kb-index-manifest.json` and call `ctx_index` on each entry, with `source` set to `source_label`, in batches of 50."
-
-Edit `QUALITY_RULES` in the script if your KB layout differs from the default (Johnny-Decimal-style numbered folders).
+Edit `QUALITY_RULES` in `.claude-plugin/scripts/index-to-context-mode.js` if your KB layout differs from the default (Johnny-Decimal-style numbered folders).
 
 ## Slash Commands
 
 | Command | Purpose |
 |---|---|
+| `/ux-project:setup-kb <kb-path>` | One-shot KB indexing: classify + ctx_index every markdown file (idempotent) |
 | `/ux-project:start <name> <prd-path>` | Initialize project workspace from a PRD; runs initial KB analysis; proposes 3–5 first questions |
 | `/ux-project:resume <name>` | Restore project context across sessions (reads only `state.md`) |
 | `/ux-project:onepage` | Generate `ux-onepage.md` (cite-check + outdated-check enforced; designer must approve) |
