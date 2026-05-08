@@ -1,0 +1,20 @@
+{
+  "name": "ux-project",
+  "version": "0.1.0",
+  "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage and design-brief, with project-level memory and cite-or-die enforcement. Drives multi-round discovery; does NOT generate UI/wireframes.",
+  "author": {
+    "name": "GuanchengDing"
+  },
+  "license": "MIT",
+  "commands": [],
+  "keywords": [
+    "ux",
+    "design",
+    "discovery",
+    "onepage",
+    "prd",
+    "jtbd",
+    "design-partner",
+    "designer"
+  ]
+}

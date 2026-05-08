@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+
+# Runtime project workspaces (per-project data, not tracked)
+/projects/*/
+!/projects/.gitkeep
+
+# Generated KB index artifacts (user-specific paths, regeneratable)
+/kb-classification.md
+/kb-index-manifest.json
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.cursor/
+
+# Node
+node_modules/
+*.log
+.npm/
+
+# Python (in case future scripts use it)
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Local environment
+.env
+.env.local

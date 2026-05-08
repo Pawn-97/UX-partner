@@ -1,0 +1,17 @@
+{
+  "name": "design-partner",
+  "owner": {
+    "name": "GuanchengDing"
+  },
+  "plugins": [
+    {
+      "name": "ux-project",
+      "source": "./.claude-plugin",
+      "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage and design-brief.",
+      "version": "0.1.0",
+      "author": {
+        "name": "GuanchengDing"
+      }
+    }
+  ]
+}

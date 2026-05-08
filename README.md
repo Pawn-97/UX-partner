@@ -1,1 +1,148 @@
-# UX-partner
+# UX Partner
+
+A Claude Code plugin that turns raw PM PRDs into KB-grounded `ux-onepage.md` and `design-brief.md` through structured multi-round discovery. Built for UX designers; produces deliverables that downstream design skills (`huashu-design`, `frontend-design`, Figma) consume directly.
+
+> **Does NOT generate UI / wireframes / Figma / hi-fi mockups.** UI generation is the next skill's job. This plugin is exclusively for the discovery phase: problem framing, user/JTBD analysis, multi-round discussion, and structured handoff.
+
+## Why this exists
+
+Designers receive PRDs that often jump straight to a UI solution before the underlying user problem is well-framed. This plugin provides a structured discovery partner that:
+
+- Reads the PRD and surfaces **possible solution bias**
+- Drives **multi-round focused discussion** (3–5 questions per round, with WHY each matters)
+- Maintains **project-level memory** across sessions (state.md as resume gateway)
+- Enforces **cite-or-die** on the final onepage (every claim has `[ref: source]`)
+- Detects **outdated PRD references** via frontmatter `valid_to`
+- Hands off a **clean design brief** to downstream design skills
+
+## Architecture
+
+```
+~/Phone-KnowledgeBase/                # external KB (640+ markdown docs)
+        │
+        │  indexed once via index-to-context-mode.js
+        ▼
+    context-mode (FTS5 + source quality tags)
+        │
+        │  ctx_search at discovery time
+        ▼
+┌─────────────────────────────────────────────────┐
+│  ux-project plugin (this repo)                  │
+│                                                 │
+│   .claude-plugin/                               │
+│   ├── skills/ux-discovery/SKILL.md              │
+│   │     description-triggered, holds principles │
+│   ├── commands/                                 │
+│   │   ├── start.md     /ux-project:start        │
+│   │   ├── resume.md    /ux-project:resume       │
+│   │   ├── onepage.md   /ux-project:onepage      │
+│   │   └── handoff.md   /ux-project:handoff      │
+│   ├── templates/        7 lazy-created files    │
+│   └── scripts/          KB indexing helper      │
+│                                                 │
+│   ux-kb-curated/                                │
+│   ├── glossary.md       term + synonym map      │
+│   └── design-principles.md  team principles     │
+│                                                 │
+│   projects/<name>/      runtime, lazy-created   │
+│   ├── pm-source.md      PRD + frontmatter       │
+│   ├── state.md          resume gateway          │
+│   ├── decisions.md      append-only log         │
+│   ├── assumptions.md    active/validated/...    │
+│   ├── questions.md      open/answered           │
+│   ├── ux-onepage.md     final deliverable       │
+│   └── design-brief.md   downstream handoff      │
+└─────────────────────────────────────────────────┘
+        │
+        │  design-brief.md feeds into
+        ▼
+    huashu-design / frontend-design / Figma
+```
+
+## Install
+
+### One-time setup
+
+```bash
+# 1. Clone the repo
+git clone git@github.com:Pawn-97/UX-partner.git "Design-partner"
+cd "Design-partner"
+
+# 2. Register the plugin with Claude Code
+claude plugin add "$(pwd)"
+
+# 3. Restart Claude Code
+```
+
+After install, the `ux-discovery` skill auto-triggers on phrases like "需求拆解 / JTBD 梳理 / PRD 分析 / ux discovery", and the four `/ux-project:*` slash commands appear in the menu.
+
+### Index your KB (one-time)
+
+If you have an existing markdown KB you want to ground onepage citations in:
+
+```bash
+node .claude-plugin/scripts/index-to-context-mode.js "/path/to/your/KB"
+```
+
+The script walks the KB, classifies each file by `source_quality`, and emits `kb-classification.md` + `kb-index-manifest.json` (both `.gitignore`d). Then ask Claude (in this directory) to do the actual indexing:
+
+> "Read `kb-index-manifest.json` and call `ctx_index` on each entry, with `source` set to `source_label`, in batches of 50."
+
+Edit `QUALITY_RULES` in the script if your KB layout differs from the default (Johnny-Decimal-style numbered folders).
+
+## Slash Commands
+
+| Command | Purpose |
+|---|---|
+| `/ux-project:start <name> <prd-path>` | Initialize project workspace from a PRD; runs initial KB analysis; proposes 3–5 first questions |
+| `/ux-project:resume <name>` | Restore project context across sessions (reads only `state.md`) |
+| `/ux-project:onepage` | Generate `ux-onepage.md` (cite-check + outdated-check enforced; designer must approve) |
+| `/ux-project:handoff` | Generate `design-brief.md` for downstream design skills |
+
+## Operating Principles (enforced)
+
+1. **PRD is the entry.** Always read it first.
+2. **Don't jump to solutions.** Reframe the user problem before discussing UI.
+3. **Cite or die.** Every onepage claim must have `[ref: path]`. Missing refs block close.
+4. **Outdated source detection.** PRD `valid_to < today` triggers warning before close.
+5. **Designer is the final judge.** LLM recommends closure; designer confirms explicitly.
+6. **Lazy file creation.** Project memory grows on demand.
+7. **Use ctx_search before reading.** KB is large; never bulk-load.
+8. **3–5 focused questions per round**, each with WHY it matters.
+9. **Memory write gate.** Never silently write decisions/assumptions/questions — show the proposed entry first and ask "记入吗？" before appending.
+
+## Phase 0 defaults (overridable)
+
+- **PRD format**: markdown only. Other formats (.docx, 飞书) require manual conversion first.
+- **`source_quality` enum**: `PRODUCT-DOC` | `TEMPLATE` | `PLAYBOOK` | `META` | `OUTDATED`
+- **`confidence` enum**: `high` | `medium` | `low`
+- **PRD ref granularity**: line-number (`pm-source.md:L12-15`)
+
+Override by editing `.claude-plugin/skills/ux-discovery/SKILL.md`.
+
+## Status — v0.1
+
+- ✅ Plugin scaffold (`plugin.json`, `marketplace.json`)
+- ✅ `ux-discovery` skill with 9 operating principles
+- ✅ 4 slash commands
+- ✅ 7 lazy templates
+- ✅ KB indexing script (smoke-tested on 640-file KB)
+- ✅ Curated glossary + design-principles seeds
+- ⏳ Validation: assumption #2 (huashu-design ingestion), assumption #3 (FTS5 + glossary recall ≥ 60%)
+
+## v0.2 candidates (deferred)
+
+- `claude-context` MCP integration (semantic retrieval — only if FTS5 + glossary fails recall threshold)
+- KB lint command (find stale `last_reviewed > 90 days`)
+- Cross-project decision search
+- `valid_to` aging report on PRD frontmatter
+
+## Documents
+
+- [`ux-discovery-skill-v0.1-onepager.md`](ux-discovery-skill-v0.1-onepager.md) — design rationale, MVP scope, assumptions to validate
+- [`ux_discovery_partner_skill_创建文档.md`](ux_discovery_partner_skill_创建文档.md) — original creation proposal (Chinese, historical context)
+- [`.claude-plugin/README.md`](.claude-plugin/README.md) — plugin internals
+
+## License
+
+MIT
