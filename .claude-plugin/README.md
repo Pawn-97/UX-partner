@@ -52,26 +52,37 @@ The bundled `ux-discovery` skill auto-activates when you mention: "ux discovery"
 ## Files & Layout
 
 ```
-Design-partner/
+Design-partner/                ← workspace root (A); cd here, run all commands here
   .claude-plugin/
     plugin.json
     marketplace.json
-    README.md             ← you are here
+    README.md                  ← you are here
     skills/ux-discovery/SKILL.md
     commands/
-      start.md            → /ux-project:start
-      resume.md           → /ux-project:resume
-      onepage.md          → /ux-project:onepage
-      handoff.md          → /ux-project:handoff
-    templates/            (7 templates: pm-source/state/decisions/assumptions/questions/onepage/brief)
+      setup-kb.md              → /ux-project:setup-kb
+      start.md                 → /ux-project:start
+      resume.md                → /ux-project:resume
+      onepage.md               → /ux-project:onepage
+      handoff.md               → /ux-project:handoff
+    templates/                 (7 templates: pm-source/state/decisions/assumptions/questions/onepage/brief)
     scripts/
-      index-to-context-mode.js   ← KB indexing helper
+      index-to-context-mode.js ← KB indexing helper
   ux-kb-curated/
-    glossary.md           ← user-curated, < 100 lines
-    design-principles.md  ← user-curated, < 100 lines
+    glossary.md                ← user-curated, shared by all projects, < 100 lines
+    design-principles.md       ← user-curated, shared by all projects, < 100 lines
   projects/
-    <project-name>/       ← runtime workspace, lazy-created per project
+    <project-name>/            ← runtime workspace, lazy-created per project
 ```
+
+## Workspace Rules
+
+**Cwd rule**: always work from the workspace root (`A`). Never `cd projects/<name>/` and run commands there — Glob lookups for `.claude-plugin/templates/` and `ux-kb-curated/` walk DOWN from cwd, not up, so they fail from a project subfolder. Switch active project by **name** via `/ux-project:resume <name>`, not by changing directory.
+
+**Shared automatically**: KB index (context-mode user-global), `ux-kb-curated/glossary.md`, `ux-kb-curated/design-principles.md`.
+
+**Not shared**: `decisions.md`, `assumptions.md`, `questions.md`, `state.md`, `pm-source.md`, `ux-onepage.md`, `design-brief.md` — all project-scoped. To make a decision universal, manually copy it into `ux-kb-curated/design-principles.md` (the skill does NOT auto-promote).
+
+See the root [README.md](../README.md) for the full Workspace Organization section with examples.
 
 ## KB Setup (one-time)
 

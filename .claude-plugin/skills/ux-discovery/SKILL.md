@@ -30,44 +30,74 @@ UI generation is handled by `huashu-design`, `frontend-design`, or Figma skills 
 8. **3–5 focused questions per round**, with WHY each matters. Never dump 20 generic questions.
 9. **Memory write gate.** Never silently write decisions / assumptions / questions. Always show the proposed entry to the designer and ask "记入 [decisions.md / assumptions.md / questions.md] 吗？" Each entry must include: type, content, source, confidence, owner, date.
 
-## Workspace layout (per project)
+## Workspace organization
+
+The plugin assumes a single **workspace root** (call it `A`) that contains:
 
 ```
-<project-root>/projects/<project-name>/
-  pm-source.md          PRD 原件 + frontmatter (read-only)         [/start 创建]
-  state.md              当前理解 + phase + last_updated             [/start 创建]
-  decisions.md          决策日志                                    [首次决策时]
-  questions.md          open / answered                             [首次问题时]
-  assumptions.md        active / validated / rejected               [首次假设时]
-  ux-onepage.md         最终交付                                    [/onepage 时]
-  design-brief.md       下游 handoff                                [/handoff 时]
+A/                                     ← cd here; run all commands from here
+├── .claude-plugin/                    ← plugin code (templates / skill / commands)
+├── ux-kb-curated/                     ← human-curated, shared by ALL projects
+│   ├── glossary.md                    (< 100 行)
+│   └── design-principles.md           (< 100 行)
+└── projects/                          ← all projects live under this folder
+    ├── <project-name-1>/              ← created by /ux-project:start
+    │   ├── pm-source.md               PRD + frontmatter (read-only)        [/start]
+    │   ├── state.md                   resume gateway                       [/start]
+    │   ├── decisions.md               append-only log                      [lazy]
+    │   ├── assumptions.md             active / validated / rejected        [lazy]
+    │   ├── questions.md               open / answered                      [lazy]
+    │   ├── ux-onepage.md              final deliverable                    [/onepage]
+    │   └── design-brief.md            downstream handoff                   [/handoff]
+    ├── <project-name-2>/
+    └── ...
 ```
 
-Curated KB anchor files (outside project workspace):
-```
-<project-root>/ux-kb-curated/
-  glossary.md           术语 + 同义词映射 (< 100 行，人工策展)
-  design-principles.md  当前产品的设计原则 (< 100 行，人工策展)
-```
+### Cwd rule (important)
 
-## Finding plugin templates
+**Always run commands from `A` (the workspace root).** Never `cd` into `projects/<name>/` and run commands there. Reasons:
 
-Templates live under the plugin directory. Find them via Glob:
+1. Templates are looked up via Glob `**/.claude-plugin/templates/...` — Glob walks DOWN from cwd, not up. From `projects/<name>/` it cannot find `A/.claude-plugin/`.
+2. `ux-kb-curated/` lookup has the same constraint.
+3. `/ux-project:start <name>` hard-codes `mkdir -p projects/<name>/` — running it from a wrong cwd creates nested junk like `projects/B/projects/<name>/`.
 
+To switch which project you're working on, do **not** cd. Use `/ux-project:resume <name>` from `A`. The skill loads that project's `state.md` and continues.
+
+### Sharing semantics
+
+**Automatically shared across all projects** (no action needed):
+
+| Resource | Where | Why shared |
+|---|---|---|
+| Indexed KB | context-mode (user-global FTS5) | `ctx_search` hits the same index from any project |
+| `ux-kb-curated/glossary.md` | `A/ux-kb-curated/` | Read at every skill activation |
+| `ux-kb-curated/design-principles.md` | `A/ux-kb-curated/` | Read at every skill activation |
+
+**NOT shared by default** (intentional — each requirement is independent context):
+
+| Resource | Where | If you want to reuse |
+|---|---|---|
+| `decisions.md` | `projects/<name>/decisions.md` | If a decision is universal (e.g., "no wireframes here ever"), manually copy it into `ux-kb-curated/design-principles.md` |
+| `assumptions.md` | `projects/<name>/assumptions.md` | Same — promote to design-principles if universal |
+| `questions.md` | `projects/<name>/questions.md` | Don't promote; questions are time-bound |
+| `state.md` | `projects/<name>/state.md` | Per-project resume state; never share |
+
+**Promotion rule**: project → curated KB happens only when the designer explicitly says so. The skill does NOT auto-promote.
+
+### Mental model mapping
+
+If the designer is thinking "one folder per design requirement, side-by-side": that maps to `projects/<name>/` subfolders, not top-level siblings of `.claude-plugin/`. The plugin auto-creates them via `/ux-project:start <name>`. Don't manually create top-level folders for projects.
+
+### Plugin templates
+
+Find them via Glob from cwd=A:
 ```
 Glob pattern: **/.claude-plugin/templates/*.template.md
 ```
 
-Available templates:
-- `pm-source.template.md` — PRD frontmatter + body skeleton
-- `state.template.md` — resume gateway file
-- `decisions.template.md` — decisions log
-- `assumptions.template.md` — assumptions tracker
-- `questions.template.md` — open/answered questions
-- `ux-onepage.template.md` — final onepage (13 sections)
-- `design-brief.template.md` — downstream handoff
+Available: `pm-source` / `state` / `decisions` / `assumptions` / `questions` / `ux-onepage` / `design-brief`.
 
-Find the curated KB anchor files via Glob: `**/ux-kb-curated/glossary.md` and `**/ux-kb-curated/design-principles.md`. **Always read these two files first** when starting any discovery work — they're the small, human-curated anchor knowledge that prevents drift.
+**Always read `ux-kb-curated/glossary.md` and `ux-kb-curated/design-principles.md` first** when starting any discovery work — they're the small, human-curated anchor knowledge that prevents drift.
 
 ## KB usage rules
 

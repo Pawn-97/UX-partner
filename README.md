@@ -59,6 +59,69 @@ Designers receive PRDs that often jump straight to a UI solution before the unde
     huashu-design / frontend-design / Figma
 ```
 
+## Workspace Organization
+
+The plugin assumes one **workspace root** (call it `A`) that holds all projects + curated KB + plugin code. Multiple design requirements live as **subfolders under `projects/`**, not as top-level siblings.
+
+### The cwd rule
+
+**Always run commands from `A` (the workspace root).** Don't `cd projects/<name>/` and run there.
+
+```bash
+cd ~/Design-partner            # ✅ workspace root, where .claude-plugin/ lives
+
+/ux-project:start alternate-routing /path/to/prd.md
+# → creates projects/alternate-routing/
+
+/ux-project:resume sms-improvements
+# → switches to that project; you do NOT cd anywhere
+
+/ux-project:onepage
+# → operates on the active project
+```
+
+Why not cd into a project folder:
+
+1. **Templates lookup breaks.** `Glob **/.claude-plugin/templates/...` walks DOWN from cwd, not up. From `projects/<name>/`, it can't find `A/.claude-plugin/`.
+2. **`ux-kb-curated/` lookup breaks** for the same reason.
+3. **`/ux-project:start` mis-creates** the project, nesting it like `projects/B/projects/<name>/`.
+
+Switch projects by **name**, not by `cd`. `state.md` is the resume gateway; the skill loads it for whichever project name you give.
+
+### Sharing semantics
+
+**Auto-shared across all projects** (no action needed):
+
+| Resource | Where | Notes |
+|---|---|---|
+| KB index | context-mode (FTS5, user-global) | `ctx_search` hits the same store from any project |
+| `glossary.md` | `A/ux-kb-curated/glossary.md` | Read on every skill activation |
+| `design-principles.md` | `A/ux-kb-curated/design-principles.md` | Read on every skill activation |
+
+**Not auto-shared** (each project is independent context):
+
+| Resource | Where |
+|---|---|
+| `decisions.md` / `assumptions.md` / `questions.md` / `state.md` | `projects/<name>/` |
+| `pm-source.md` (the PRD) | `projects/<name>/` |
+| `ux-onepage.md` / `design-brief.md` | `projects/<name>/` |
+
+### Promoting a project decision to "universal"
+
+If a decision in project A turns out to apply to all future projects (e.g., "Phone admin UIs always require a confirmation step before destructive actions"), copy that line into `ux-kb-curated/design-principles.md` manually. The skill **does not auto-promote**. Promotion is the designer's explicit act — it's how curated KB stays high-quality.
+
+### Mental model: "one folder per requirement"
+
+If you naturally think "I want a folder per design task at the top level (B/C/D/E side-by-side)", that maps to:
+
+```
+projects/B/   projects/C/   projects/D/   projects/E/
+```
+
+Not to `B/ C/ D/ E/` directly under `A/`. The `projects/` prefix is what tells the plugin "these are projects, not random folders". Don't manually create top-level folders for projects — `/ux-project:start <name>` does it correctly.
+
+You CAN add other top-level folders for non-project content (e.g., `A/docs/`, `A/scripts/`, `A/references/`) — those are ignored by the plugin.
+
 ## Install
 
 ### Option A — Marketplace (recommended)
