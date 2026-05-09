@@ -3,6 +3,10 @@ project: <project-name>
 generated: <YYYY-MM-DD>
 prd_source: ./pm-source.md
 prd_version: <v1 / v2 / ...>
+stale: false
+stale_reason: null
+last_regen: <YYYY-MM-DD>
+regen_count: 0
 ---
 
 <!--
@@ -11,13 +15,29 @@ Cite-or-die rule: every claim below MUST end with [ref: <path>].
 - decisions.md:D<id> for decisions
 - assumptions.md:A<id> for assumptions (mark these as inference, not fact)
 - questions.md:Q<id> for open questions
+- memory/<type>.md#m-<id> for context-memory citations (★ v0.2 — must have status: active)
 - <kb-path> for KB-sourced facts (use the actual ctx_search result path)
 
 Outdated PRD refs get ⚠️ outdated marker.
-Sections may be empty if not applicable to this project. Empty sections should be marked with `_(not applicable)_` so it's clear they weren't skipped accidentally.
+★ v0.2 — Memory cites with status != active block generation (cite-check rejects them).
+
+★ v0.2 — Stale handling:
+When stale: true, the skill renders a banner at the top of the body:
+> ⚠️ This onepage is stale. Reason: <stale_reason>. Run `/ux-project:onepage` to regenerate.
+
+On regen: produce a diff vs the previous version, show to designer, then on approval:
+- overwrite the file
+- clear stale=false, stale_reason=null
+- bump regen_count
+- set last_regen to today
+
+Sections may be empty if not applicable. Mark empty sections with `_(not applicable)_`
+so it's clear they weren't skipped accidentally.
 -->
 
 # UX Onepage: <project-name>
+
+<!-- ★ v0.2 — Stale banner inserted here when stale: true. Removed on regen. -->
 
 ## 1. Final Goal
 
@@ -75,11 +95,12 @@ The user does NOT want to <unwanted state>. [ref: ...]
 2. **<scenario name>** — ... [ref: ...]
 3. **<scenario name>** — ... [ref: ...]
 
-## 8. Constraints from KB
+## 8. Constraints from KB and project memory
 
 | Constraint | Source | Confidence |
 |---|---|---|
-| ... | [ref: ...] | high/medium/low |
+| <KB-derived> | [ref: <kb-path>] | high/medium/low |
+| <project memory> | [ref: memory/constraints.md#m-cst-001] | high/medium/low |
 
 ## 9. Key Decisions
 
@@ -115,3 +136,4 @@ The user does NOT want to <unwanted state>. [ref: ...]
 - States to consider: default / empty / loading / success / error / permission-restricted / edge
 - Key risks downstream should design around: ...
 - Reference patterns from KB: ... [ref: ...]
+- ★ v0.2 — Project-specific stakeholders / terminology / history pointers: [ref: memory/...]

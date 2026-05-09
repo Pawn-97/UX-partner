@@ -1,7 +1,7 @@
 {
   "name": "ux-project",
-  "version": "0.1.0",
-  "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage and design-brief, with project-level memory and cite-or-die enforcement. Drives multi-round discovery; does NOT generate UI/wireframes.",
+  "version": "0.2.0",
+  "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage and design-brief, with project-level context-memory (stakeholders/constraints/terminology/history/preferences), continuous context absorption (/ux-project:add-context + auto-propose), stale-onepage regen with diff, cross-project designer-preferences, state.md size cap, and cite-or-die enforcement. Drives multi-round discovery; does NOT generate UI/wireframes.",
   "author": {
     "name": "GuanchengDing"
   },
@@ -15,6 +15,8 @@
     "prd",
     "jtbd",
     "design-partner",
-    "designer"
+    "designer",
+    "memory",
+    "context-memory"
   ]
 }
