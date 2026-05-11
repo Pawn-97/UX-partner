@@ -127,8 +127,8 @@ You CAN add other top-level folders for non-project content (e.g., `A/docs/`, `A
 ### Option A — Marketplace (recommended)
 
 ```bash
-claude plugin marketplace add Pawn-97/UX-partner
-claude plugin install --scope user ux-project
+/plugin marketplace add Pawn-97/UX-partner
+/plugin install ux-project@design-partner
 ```
 
 Restart Claude Code. The `ux-discovery` skill auto-triggers on phrases like "需求拆解 / JTBD 梳理 / PRD 分析 / ux discovery", and the `/ux-project:*` slash commands appear in the menu.
