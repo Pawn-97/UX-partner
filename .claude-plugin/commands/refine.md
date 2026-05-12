@@ -58,21 +58,80 @@ options:
 options always include Other.
 ```
 
-### Step 3 — Background gathering (3–5 focused rounds)
+### Step 3 — 先扫已有上下文 (rule 23 — KB-first)
 
-For each topic below, fire ONE `AskUserQuestion` (rule 17 / Question UI contract):
+**在向设计师问任何背景问题之前**，先静默扫一遍下列来源（设计师看不到这一步，只看到结果）:
 
-1. **Primary user** — who is this for, specifically? (offer 2–4 personas from PRD or memory; allow Other)
-2. **Success criteria** — what does success look like? (quantitative metric / qualitative outcome / both)
-3. **Constraints** — time / tech / compliance / team boundaries? (cross-ref `memory/constraints.md` if exists)
-4. **Online behavior baseline** ★ v0.4 — How do users solve this today? Current metrics? Pain points? Workarounds?
-   - If designer doesn't know → write entry to `questions.md` as blocking; propose to ask PM/Eng/analytics.
-   - If designer knows → propose entries for `memory/baseline.md` using the standard memory write gate (rule 9).
-5. **Prior attempts** — what's been tried? (cross-ref `memory/history.md`)
+1. `projects/<name>/pm-source.md`（PRD 全文，用 Read with `limit` 分段读）
+2. `projects/<name>/memory/*.md`（项目级记忆：stakeholders / constraints / terminology / history / preferences / baseline）
+3. `ux-kb-curated/*`（跨项目锚点：glossary / design-principles / designer-preferences）
+4. `ctx_search` 索引 KB——按下面 5 个维度各跑 1–2 个 query（每 query ≤ top 5 chunks）
 
-After each round, the standard auto-propose memory pipeline runs (rule 11). Confirmed entries → `memory/*.md`.
+按 5 个维度归档已知信息（用一个内部表，不展示给设计师）:
 
-### Step 4 — Expand scenarios via lenses (rule 19)
+| 维度 | 已找到的内容 | 来源 | 完整度 |
+|---|---|---|---|
+| 主用户 | ... | pm-source.md:L12 / memory/stakeholders.md#m-sth-002 | 已知 / 不全 / 没有 |
+| 成功标准 | ... | ... | ... |
+| 约束 | ... | memory/constraints.md#m-cst-* | ... |
+| 现状基线 | ... | memory/baseline.md / KB | ... |
+| 历史尝试 | ... | memory/history.md | ... |
+
+### Step 4 — 按"已知 / 不全 / 没有"分档提问
+
+对每个维度按完整度走不同分支（说人话——别说 "KB sweep" / "已知档"，用对话化表达）:
+
+**A. 已知**（KB/memory 已有完整答案）→ 直接确认，不开问:
+
+```
+AskUserQuestion({
+  question: "关于<维度>，我在你的项目记录和知识库里找到这些：<一句话总结>。对吗？",
+  options: [
+    { label: "✅ 对，没问题",   description: "信息准确，继续往下" },
+    { label: "✏️ 要补几条",    description: "大方向对，但还有内容要加" },
+    { label: "❌ 不对，要改",   description: "找到的信息有误，需要修正" }
+  ],
+  allow_other: true
+})
+```
+
+**B. 不全**（KB/memory 有部分）→ 先列已知，只问缺口:
+
+```
+AskUserQuestion({
+  question: "<维度>这块我找到 <已知部分>，但 <缺口> 这点没看到，能补一下吗？",
+  options: [
+    { label: "<option 1 from PRD/memory>", description: "..." },
+    { label: "<option 2>", description: "..." },
+    ...
+  ],
+  allow_other: true
+})
+```
+
+**C. 没有**（KB/memory 完全没覆盖）→ 走原来的开放问题:
+
+| # | 维度 | 开放问题 |
+|---|---|---|
+| 1 | 主用户 | 这个功能主要给谁用？还有谁会受影响？ |
+| 2 | 成功标准 | 做对了应该看到什么？有数字目标还是体感目标？ |
+| 3 | 约束 | 时间 / 技术 / 合规 / 团队上有什么硬限制？ |
+| 4 | 现状基线 ★ v0.4 | 用户现在是怎么解决这件事的？有什么数据 / 痛点 / 临时方案？ — 答不上 → 写入 `questions.md` 标 blocking |
+| 5 | 历史尝试 | 之前试过什么方法？为什么没成？ |
+
+**对设计师呈现的开头话术**（说人话，不暴露搜索过程）:
+
+> "我在你的项目记录和知识库里先找了一下，<X> 维度已经有信息了，<Y> 维度部分清楚，<Z> 维度还没看到。先确认前两个，再聊一下 <Z>。"
+
+不要说："I ran ctx_search across N chunks, found M references, queried memory/*..."
+
+### Step 5 — 自动记忆候选
+
+每轮回答后，标准 auto-propose 管线运行（rule 11）。确认通过的条目 → `memory/*.md`。
+
+设计师对**"已知"档**的确认本身就是对已有记忆的 re-validate——如果设计师说"要改"，把对应 memory entry 标 `superseded` 并写新条目（rule 12 memory status check）。
+
+### Step 6 — Expand scenarios via lenses (rule 19)
 
 Pick 2–4 of the 5 lenses based on what fits this project:
 - **Persona shift**
@@ -96,7 +155,7 @@ Output as a table in chat:
 | ... |
 ```
 
-### Step 5 — Phase 1 Gate
+### Step 7 — Phase 1 Gate
 
 Fire the gate (must use plain Chinese — rule 22):
 
@@ -125,7 +184,7 @@ Branch:
 
 **Goal**: Apply rubric → KEEP / CUT scenarios → JTBD list + Not Doing list.
 
-### Step 6 — Apply rubric to each scenario (rule 20)
+### Step 8 — Apply rubric to each scenario (rule 20)
 
 For each Phase 1 scenario, draft a row:
 
@@ -151,7 +210,7 @@ options:
   - "✏️ 理由要改"       / "决定可能对，但理由需要修"
 ```
 
-### Step 7 — Build the Not Doing list
+### Step 9 — Build the Not Doing list
 
 Every CUT must have a one-line reason. Format:
 
@@ -161,7 +220,7 @@ Every CUT must have a one-line reason. Format:
 
 Reasons should be specific: scope decision, frequency too low, owned by adjacent team, technical blocker, etc.
 
-### Step 8 — Convert KEEP set to JTBD
+### Step 10 — Convert KEEP set to JTBD
 
 For each KEEP scenario, format as JTBD:
 
@@ -174,7 +233,7 @@ Cluster into:
 - **Secondary JTBD** (supporting jobs)
 - **Anti-JTBD** (what user does NOT want — at least 1)
 
-### Step 9 — Render Phase 2 HTML preview (optional, for designer review)
+### Step 11 — Render Phase 2 HTML preview (optional, for designer review)
 
 If designer wants a visual preview before gate, generate a minimal HTML snippet showing:
 - Rubric table
@@ -183,7 +242,7 @@ If designer wants a visual preview before gate, generate a minimal HTML snippet 
 
 This is a preview only — full HTML is generated at Phase 3 close via `/ux-project:onepage`.
 
-### Step 10 — Phase 2 Gate
+### Step 12 — Phase 2 Gate
 
 ```
 AskUserQuestion({
@@ -199,7 +258,7 @@ AskUserQuestion({
 
 Branch:
 - ✅ 可以下一步 → `state.md`: `phase: phase_3_ship`, `phase_2_confirmed_at: <today>`. Continue to Phase 3.
-- ✏️ 还要改一下 → loop back to step 6 / 7 / 8.
+- ✏️ 还要改一下 → loop back to step 8 / 9 / 10.
 - ⏸ 先暂停 → save state; exit.
 
 ---
@@ -208,7 +267,7 @@ Branch:
 
 **Goal**: IA structure + interaction flow → final `ux-onepage.md` + `ux-onepage.html`.
 
-### Step 11 — Draft IA structure (rule 21)
+### Step 13 — Draft IA structure (rule 21)
 
 Build a nested container hierarchy. **Purpose labels only.** Forbidden: button / dropdown / modal / color / typography.
 
@@ -236,7 +295,7 @@ options:
   - "🚫 删掉一块"    / "有区块多余"
 ```
 
-### Step 12 — Draft interaction flow
+### Step 14 — Draft interaction flow
 
 Pick the right diagram type based on the flow's nature:
 - **State-heavy** (entity moves through states): `stateDiagram-v2`
@@ -260,11 +319,11 @@ options:
   - "🚫 删掉一条分支" / "有分支多余"
 ```
 
-### Step 13 — JTBD ↔ IA/flow coverage check
+### Step 15 — JTBD ↔ IA/flow coverage check
 
 For each KEEP JTBD, verify it maps to ≥1 IA branch AND ≥1 flow path. If any JTBD has no coverage, flag it and ask the designer how to address (add an IA section? Flow branch? Demote the JTBD?).
 
-### Step 14 — Phase 3 Gate (final approval)
+### Step 16 — Phase 3 Gate (final approval)
 
 ```
 AskUserQuestion({
@@ -282,12 +341,12 @@ AskUserQuestion({
 Branch:
 - ✅ 可以生成 → set `phase_3_confirmed_at: <today>`, `phase: ready_for_onepage`. Run `/ux-project:onepage` next.
 - ⚠️ 带保留意见生成 → write caveats to `questions.md` (one `AskUserQuestion` per caveat to confirm); then proceed as approve.
-- ✏️ 还要改一下 → loop back to step 11 / 12 / 13.
+- ✏️ 还要改一下 → loop back to step 13 / 14 / 15.
 - ⏸ 先暂停 → save state; exit.
 
 ---
 
-## Step 15 — Trigger `/ux-project:onepage`
+## Step 17 — Trigger `/ux-project:onepage`
 
 On Ship: call `/ux-project:onepage` (the cite-check + final generation primitive). The onepage command will:
 - Run cite-check, memory status check, outdated check

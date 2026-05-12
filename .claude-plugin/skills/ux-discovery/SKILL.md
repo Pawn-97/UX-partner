@@ -232,7 +232,17 @@ Hi-fi UI generation, visual styling, and Figma artifacts are handled by `huashu-
     - 是不是在**解释"我刚才在做什么"**？设计师能看到结果，删掉过程描述。
     - 如果一个词需要先解释才能让设计师懂 → 它就是黑话 → 换掉。
 
-> Principles 15 + 16 borrowed from [lsdefine/GenericAgent](https://github.com/lsdefine/GenericAgent) (L1 hard cap + read-side hint patterns; researched 2026-05-08). Principle 17 leverages Claude Code's built-in `AskUserQuestion` tool for high-signal structured input. Principles 18–21 inspired by [`idea-refine`](https://github.com/anthropics/agent-skills) divergent → convergent → concrete paradigm, adapted for UX requirement discovery. Principle 22 enforces designer-friendly plain-language output — borrowed insight: process labels useful internally are noise externally.
+23. **★ v0.4 — KB-first background gathering（先查再问）.** 在 Phase 1 询问任何背景问题之前，**必须先静默扫一遍已有上下文**：`pm-source.md`、`projects/<name>/memory/*.md`、`ux-kb-curated/*`、`ctx_search` 索引知识库。然后按"已知 / 不全 / 没有"三档处理每个背景维度：
+
+    - **已知**（KB / memory 有明确答案）→ 把找到的内容总结给设计师，用 `AskUserQuestion` 让 ta 确认"对吗？要补充吗？"——**不要重新开问**
+    - **不全**（部分信息）→ 列出已知部分，只问缺的那块
+    - **没有**（KB 完全没覆盖）→ 才走原来的开放式提问
+
+    **Why**: 设计师最反感被问已经回答过的问题。PM 在 PRD 里写过的、上个项目记忆里有的、KB 里能查到的，都不该再问一遍。
+    **How to apply**: Phase 1 Step 3（"背景收集"）的 5 个维度——主用户 / 成功标准 / 约束 / 现状基线 / 历史尝试——每一个都先跑一轮 `ctx_search`（≤ 2 个 query）+ 读 memory，再决定是确认还是开问。**搜索过程对设计师静默**，只展示结果（说人话：不是"我在 KB 里 search 了..."而是"我在你之前的项目记录和知识库里找了一下..."）。
+    **覆盖范围**: 仅限 Phase 1 背景收集环节。Phase 2/3 的判断/决策仍走对话主导，不需要每个问题都先查 KB。
+
+> Principles 15 + 16 borrowed from [lsdefine/GenericAgent](https://github.com/lsdefine/GenericAgent) (L1 hard cap + read-side hint patterns; researched 2026-05-08). Principle 17 leverages Claude Code's built-in `AskUserQuestion` tool for high-signal structured input. Principles 18–21 inspired by [`idea-refine`](https://github.com/anthropics/agent-skills) divergent → convergent → concrete paradigm, adapted for UX requirement discovery. Principle 22 enforces designer-friendly plain-language output. Principle 23 prevents redundant questioning by sweeping existing context first — borrowed insight from PM workflow tools: "don't ask what's already been answered."
 
 ## Question UI contract (★ v0.3)
 
@@ -648,7 +658,7 @@ Skill recommends closure; designer owns it. Output `Closure Readiness` summary (
 | Phase | Round | Goal | Output |
 |---|---|---|---|
 | — | 0 (`/ux-project:start`) | Structured task summary | < 200-char summary + 3–5 questions; written to state.md after designer confirm |
-| **Phase 1 — Understand & Expand** | 1 | Restate goal + clarify background + online-behavior baseline | reframed problem; `memory/baseline.md` populated; refined Current Understanding |
+| **Phase 1 — Understand & Expand** | 1 | Restate goal + **先扫 KB/memory（rule 23）**+ 只问没覆盖的背景 + online-behavior baseline | reframed problem; `memory/baseline.md` populated; refined Current Understanding |
 | Phase 1 | 2 | Challenge solution bias; map users/behaviors | initial assumptions, decisions, user-roles, user-behaviors |
 | Phase 1 | 3 | Expand scenarios via lenses (rule 19) | 6–12 scenarios with lens labels |
 | Phase 1 | **Gate 1** | Phase 1 confirmation | `phase_1_confirmed_at` set |
@@ -725,3 +735,5 @@ If you find yourself doing any of these, stop and reset:
 - ★ v0.4 — 中英混杂如 "用 5 个 lens 展开 scenarios" 出现在 designer 可见输出 (rule 22)
 - ★ v0.4 — 对话里念字段名（`phase_2_confirmed_at`、`auto_propose`、`m-cst-001`、`status: active`）而不是静默写文件 (rule 22.5)
 - ★ v0.4 — 对话里解释 agent 自己在做什么（"我现在 propose 到 memory/constraints" / "我跑完了 rubric"）而不是直接给结果 (rule 22.5)
+- ★ v0.4 — Phase 1 没先扫 `pm-source.md` + `memory/*.md` + `ux-kb-curated/*` + `ctx_search` 就直接开问设计师背景问题 (rule 23)
+- ★ v0.4 — Phase 1 把 KB / memory 里已经有答案的问题重新抛给设计师（应该改成"找到这些，对吗？"） (rule 23)
