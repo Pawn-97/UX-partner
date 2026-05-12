@@ -7,8 +7,8 @@
     {
       "name": "ux-project",
       "source": "./.claude-plugin",
-      "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage and design-brief, with project-level context-memory, continuous context absorption (/add-context), stale-onepage regen with diff, cross-project designer-preferences, and (v0.3) UI-first questioning via AskUserQuestion.",
-      "version": "0.3.0",
+      "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage (md + HTML 一图流) via a 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). v0.4.x adds: phase gates, scenario lenses, JTBD rubric, online-behavior baseline memory, IA + interaction flow output (B&W), 说人话规范 covering all designer-facing text, KB-first background gathering (rule 23), and /ux-project:update for one-command plugin upgrades. Preserves v0.3 cite-or-die, context-memory, stale detection, and AskUserQuestion UI.",
+      "version": "0.4.1",
       "author": {
         "name": "GuanchengDing"
       }
