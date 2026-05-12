@@ -78,7 +78,7 @@ First exploration prompt ready for: huashu-design / frontend-design / Figma
 ## Failure modes
 
 - ux-onepage.md missing → stop, suggest /ux-project:onepage first.
-- ux-onepage.md has unresolved cite-check or outdated warnings (`⚠️` markers) → flag them in the brief output, ask designer if they want to continue. Don't silently propagate them.
+- ux-onepage.md has unresolved cite-check or outdated warnings (`⚠️` markers) → flag them; **★ v0.3 — confirm via `AskUserQuestion`** (SKILL.md § Question UI contract): `options: [✅ Continue / ❌ Stop / ✏️ Fix-first]`, `allow_other: true`. Don't silently propagate.
 - Template not found → fall back to inline structure (see template content); warn that the plugin install may be incomplete.
 
 ## What NOT to do

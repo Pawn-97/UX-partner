@@ -7,8 +7,8 @@
     {
       "name": "ux-project",
       "source": "./.claude-plugin",
-      "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage and design-brief, with project-level context-memory, continuous context absorption (/add-context), stale-onepage regen with diff, and cross-project designer-preferences.",
-      "version": "0.2.0",
+      "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage and design-brief, with project-level context-memory, continuous context absorption (/add-context), stale-onepage regen with diff, cross-project designer-preferences, and (v0.3) UI-first questioning via AskUserQuestion.",
+      "version": "0.3.0",
       "author": {
         "name": "GuanchengDing"
       }

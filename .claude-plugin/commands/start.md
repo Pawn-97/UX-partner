@@ -76,28 +76,33 @@ Output this structure to the designer **exactly**:
 - <chunk title> [ref: <kb-path>] (confidence: <h/m/l>)
 - ...
 
-## 我理解对吗？
-
-请 confirm / 修订 / 重提。confirm 后我会把这段写入 `state.md#Current Understanding`。
-
-## 接下来想问你的 3-5 个问题
-
-1. **<question>** — Why this matters: <one line>
-2. **<question>** — Why this matters: <one line>
-3. **<question>** — Why this matters: <one line>
 ```
 
 **Strictly enforce the < 200-char cap on the 5 bullet lines combined.** If you cannot fit, drop "可能的 solution bias" first (it's the easiest to discuss in round 1 instead).
 
-### 7. ★ v0.2 — Wait for designer confirm/edit/reject
+**After printing the summary**, immediately invoke `AskUserQuestion` (★ v0.3 — see SKILL.md § Question UI contract) for the confirm gate:
 
-**Do NOT write to state.md yet.** Stop here and wait for the designer's response. Possible responses:
+```
+AskUserQuestion({
+  question: "这个理解对吗？",
+  options: [
+    { label: "✅ Confirm", description: "summary 准确，进入讨论" },
+    { label: "✏️ Edit",    description: "大方向对，但要改某几条" },
+    { label: "❌ Reject",  description: "理解偏了，需要重提" }
+  ],
+  allow_other: true   // designer can write a custom note
+})
+```
 
-- **confirm / yes / 对 / 没问题** → proceed to step 8 with the summary as-is
-- **edit / 修订 / 改一下** → designer rewrites one or more bullets; re-output the corrected summary, ask "再 confirm 一次？"
-- **reject / 不对 / 重提** → ask 1–2 clarifying questions, then re-do step 6 from updated understanding
+### 7. ★ v0.2 / v0.3 — Handle confirm/edit/reject from the picker
 
-Loop until designer explicitly confirms.
+**Do NOT write to state.md yet.** Branch on the `AskUserQuestion` result:
+
+- **✅ Confirm** → proceed to step 8 with the summary as-is.
+- **✏️ Edit** → ask (via another `AskUserQuestion` with the 5 bullet labels as options, or via free-text "Other") which bullet to revise; re-output the corrected summary; re-fire the confirm gate.
+- **❌ Reject** → ask 1–2 clarifying questions (each as its own `AskUserQuestion` call with 2–3 plausible angles + Other); re-do step 6 from the updated understanding.
+
+Loop until designer picks ✅ Confirm.
 
 ### 8. Update state.md after confirm
 
@@ -106,7 +111,9 @@ Edit `projects/<project-name>/state.md`:
 - Set `# Recommended Next Step`: "Discuss the 3–5 questions above with the designer."
 - Verify body is ≤ 30 lines (will be on first write — empty memory index).
 
-### 9. Closing message
+### 9. Closing message + fire round-1 questions
+
+Print plain-text closing message:
 
 ```
 项目 **<project-name>** 已初始化。
@@ -115,8 +122,24 @@ Edit `projects/<project-name>/state.md`:
 - pm-source.md (PRD v1, valid_from <today>)
 - state.md (phase: intake, auto_propose: true/batched)
 
-下一步：直接回答上面的 3–5 个问题开始讨论；或 `/ux-project:resume <project-name>` 随时查看状态；或 `/ux-project:add-context <text|path>` 补充背景。
+下一步：先回答下面 3–5 个 round-1 问题；或 `/ux-project:resume <project-name>` 查看状态；或 `/ux-project:add-context <text|path>` 补背景。
 ```
+
+**★ v0.3 — Then immediately fire the 3–5 round-1 questions, ONE `AskUserQuestion` per question.** Each call:
+
+```
+AskUserQuestion({
+  question: "<question text — in designer's language>",
+  options: [
+    { label: "<plausible answer A>", description: "<WHY this angle matters>" },
+    { label: "<plausible answer B>", description: "<WHY>" },
+    { label: "<plausible answer C>", description: "<WHY>" }   // 2–4 options
+  ],
+  allow_other: true
+})
+```
+
+Plausible options come from your PRD analysis + KB context — they're hypothesis anchors, not the only valid answers. The "Other" field lets the designer free-text any nuance. Wait for each answer before firing the next question (sequential, not batched).
 
 ## Failure modes
 

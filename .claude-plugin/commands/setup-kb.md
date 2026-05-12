@@ -55,23 +55,41 @@ KB classification:
 Total: <n> markdown files
 ```
 
-If `UNCATEGORIZED` is non-zero, list the file paths and ask:
-> "这些文件未分类。继续索引（默认按 UNCATEGORIZED 入库），还是让我等你先在 `.claude-plugin/scripts/index-to-context-mode.js` 加规则？"
+If `UNCATEGORIZED` is non-zero, list the file paths. **★ v0.3 — fire `AskUserQuestion`** (SKILL.md § Question UI contract):
 
-Wait for the designer's choice. Default action if no answer: continue.
+```
+AskUserQuestion({
+  question: "<n> 个文件未分类。怎么处理？",
+  options: [
+    { label: "▶️ Continue",   description: "按 UNCATEGORIZED 入库，索引继续" },
+    { label: "⏸ Wait for rules", description: "我先在 .claude-plugin/scripts/index-to-context-mode.js 加规则，再重跑" },
+    { label: "⊘ Skip uncategorized", description: "只索引已分类文件，UNCATEGORIZED 跳过" }
+  ],
+  allow_other: true
+})
+```
 
 ### 4. Confirm before bulk indexing
 
-Show:
+Show plain-text stats:
 ```
 即将调用 ctx_index <total> 次（每文件一次）。
 - 估时: ~1-2 分钟 (取决于网络和文件大小)
 - 幂等: 重复跑不会重复入库（ctx_index 用内容哈希去重）
-
-继续？ (yes / no)
 ```
 
-Wait for confirmation.
+**★ v0.3 — Then fire `AskUserQuestion`** (SKILL.md § Question UI contract):
+
+```
+AskUserQuestion({
+  question: "Bulk index <total> 个文件，继续吗？",
+  options: [
+    { label: "✅ Go",    description: "开始 ctx_index" },
+    { label: "❌ Cancel", description: "取消，不索引" }
+  ],
+  allow_other: true
+})
+```
 
 ### 5. Read the manifest
 

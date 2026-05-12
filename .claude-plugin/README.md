@@ -8,9 +8,22 @@ UX discovery partner for designers. Turns a raw PM PRD into a KB-grounded `ux-on
 
 ### Marketplace (recommended)
 
+Start `claude` first (these are **slash commands run inside the REPL**, not shell commands):
+
+```
+/plugin marketplace add Pawn-97/UX-partner
+/plugin install ux-project@design-partner
+```
+
+For project-scoped install (only enabled in one folder):
+
 ```bash
-claude plugin marketplace add Pawn-97/UX-partner
-claude plugin install --scope user ux-project
+cd /path/to/your/project
+claude
+```
+then in the REPL:
+```
+/plugin install ux-project@design-partner --scope project
 ```
 
 ### Local Clone (for development)
@@ -18,10 +31,15 @@ claude plugin install --scope user ux-project
 ```bash
 git clone git@github.com:Pawn-97/UX-partner.git
 cd UX-partner
-claude plugin add "$(pwd)"
+claude
+```
+then in the REPL:
+```
+/plugin marketplace add "$(pwd)"
+/plugin install ux-project@design-partner
 ```
 
-After install, restart Claude Code (or reload plugins). The skill auto-triggers on UX-discovery keywords; the slash commands appear under `/ux-project:*`.
+After install, run `/reload-plugins` (or restart `claude`). The skill auto-triggers on UX-discovery keywords; the slash commands appear under `/ux-project:*`.
 
 ## Slash Commands
 
@@ -59,6 +77,10 @@ The bundled `ux-discovery` skill auto-activates when you mention: "ux discovery"
 14. **PRD upgrade default lazy** with hybrid prompt ("现在 review / 稍后").
 15. **state.md size cap**: body ≤ 30 lines / < 1k tokens; oldest Memory Index entries demote on overflow.
 16. **Read-triggered propose**: when reading any memory file mid-discussion, internally check for needed updates.
+
+### ★ v0.3 additions
+
+17. **UI-first questioning.** Every designer-facing question — confirm gates, the 3–5 round questions, memory-type classification, project selection, closure decisions, diff approval — is delivered via Claude Code's `AskUserQuestion` structured picker, not plain text. Each call provides 2–5 labelled options + an "Other" free-text fallback. Plain text is reserved for narration, summaries, and error reports.
 
 ## Files & Layout
 

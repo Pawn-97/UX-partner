@@ -132,13 +132,27 @@ Output this summary:
 | Handoff readiness | ✅/⚠/❌ | ... |
 
 **Recommendation**: [continue discussion / close with caveats / ready to close]
-
-确认收尾并生成 ux-onepage.md 吗？(yes / no / hold)
 ```
 
-### 9. Wait for designer approval
+**★ v0.3 — Then fire the closure gate via `AskUserQuestion` (SKILL.md § Question UI contract):**
 
-Do **not** proceed without explicit "yes" / "确认" / "close" / "go" or equivalent.
+```
+AskUserQuestion({
+  question: "确认收尾并生成 ux-onepage.md 吗？",
+  options: [
+    { label: "✅ Close",        description: "6 个维度都够 sharp，生成 onepage" },
+    { label: "⚠️ Close w/ caveats", description: "带 caveats 收尾，未完善维度记入 questions.md" },
+    { label: "⏸ Hold",          description: "暂不收尾，先回去补讨论" },
+    { label: "❌ No",            description: "ready check 不通过，重 review" }
+  ],
+  allow_other: true
+})
+```
+
+### 9. Branch on closure decision
+
+- ✅ Close / ⚠️ Close w/ caveats → proceed to step 10 (diff if previous exists)
+- ⏸ Hold / ❌ No → stop. Do NOT write onepage. If caveats listed, write them as `# Open Questions` entries (one `AskUserQuestion` per caveat to confirm — see add-context.md § 5 pattern).
 
 If "no" or "hold" → stop. Suggest what to clarify before retrying.
 
@@ -171,9 +185,23 @@ b. Produce a diff summary:
 <count>/13
 ```
 
-c. Show diff to designer; ask: "Diff 看起来对吗？approve 写入吗？(yes / no)"
+c. Show diff to designer; **★ v0.3 — fire `AskUserQuestion` (SKILL.md § Question UI contract):**
 
-If "no", iterate. If "yes", proceed to step 11.
+```
+AskUserQuestion({
+  question: "Diff 看起来对吗？approve 写入吗？",
+  options: [
+    { label: "✅ Approve",  description: "diff 看完了，写入 ux-onepage.md" },
+    { label: "✏️ Iterate", description: "diff 里某条不对，改一下再 review" },
+    { label: "⏸ Hold",     description: "暂缓 regen，先回去讨论" }
+  ],
+  allow_other: true
+})
+```
+
+- ✅ Approve → step 11
+- ✏️ Iterate → ask which section/cite to revise (Other free-text); regenerate that part; re-diff; re-fire the gate
+- ⏸ Hold → stop without writing
 
 If no previous (first generation), skip step 10.
 

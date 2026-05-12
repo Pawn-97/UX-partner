@@ -65,7 +65,24 @@ Read the raw content. For each distinct claim/fact, classify into ONE of:
 | decision | decisions.md (v0.1) | confirmed design decision |
 | assumption | assumptions.md (v0.1) | unconfirmed working hypothesis |
 
-If a claim could fit two types, prefer the more specific one (constraint > stakeholder; terminology > preference). Don't auto-pick when truly ambiguous — ask the designer.
+If a claim could fit two types, prefer the more specific one (constraint > stakeholder; terminology > preference). **★ v0.3 — When truly ambiguous, ask via `AskUserQuestion` (SKILL.md § Question UI contract):**
+
+```
+AskUserQuestion({
+  question: "这条记到哪一类 memory？  ‹excerpt of the claim›",
+  options: [
+    { label: "Stakeholder", description: "人 / 团队 / 角色相关" },
+    { label: "Constraint",  description: "硬约束、deadline、技术/合规限制" },
+    { label: "Terminology", description: "项目特定术语、缩写、产品名" },
+    { label: "History",     description: "之前发生过的事、试过的方案、教训" },
+    { label: "Preference",  description: "设计师/团队偏好" },
+    { label: "Decision",    description: "已确认的设计决策（v0.1 decisions.md）" },
+    { label: "Assumption",  description: "未确认的工作假设（v0.1 assumptions.md）" },
+    { label: "Skip",        description: "不分类，跳过这条" }
+  ],
+  allow_other: true
+})
+```
 
 ### 5. Propose memory entries (one at a time)
 
@@ -82,7 +99,20 @@ Proposed entry for memory/<type>.md:
 - status: active
 - date: <today YYYY-MM-DD>
 
-记入 memory/<type>.md 吗？(yes / edit / skip)
+```
+
+**★ v0.3 — Then fire the confirm gate via `AskUserQuestion`:**
+
+```
+AskUserQuestion({
+  question: "记入 memory/<type>.md 吗？",
+  options: [
+    { label: "✅ Yes",  description: "按 proposal 写入" },
+    { label: "✏️ Edit", description: "content / confidence / type 改一下再写" },
+    { label: "❌ Skip", description: "不记入，丢弃这条" }
+  ],
+  allow_other: true
+})
 ```
 
 ID generation: `m-<prefix>-<6 chars from hash(content + date)>`. Prefixes:
@@ -94,10 +124,10 @@ ID generation: `m-<prefix>-<6 chars from hash(content + date)>`. Prefixes:
 - decision → D<n> (v0.1 numbering — read decisions.md last D<n> + 1)
 - assumption → A<n> (v0.1 numbering — read assumptions.md last A<n> + 1)
 
-Wait for designer response per entry:
-- yes / 记入 / save → write
-- no / skip → drop, move to next
-- edit → designer rewrites content; re-propose, then write
+Branch on the picker result:
+- ✅ Yes → write
+- ❌ Skip → drop, move to next
+- ✏️ Edit → ask via another `AskUserQuestion` which field to edit (content / confidence / type / source), then collect new value via Other; re-propose, re-confirm.
 
 ### 6. Write confirmed entries
 
@@ -167,7 +197,7 @@ If banner already exists from a previous /add-context, append the new m-ids to i
 - File path doesn't exist → stop, ask for correction.
 - Empty input → stop, ask for content.
 - All entries rejected by designer → don't create empty memory files; raw stays in background.md with `(none)` trace.
-- Memory type genuinely ambiguous → ask designer to choose, don't auto-pick.
+- Memory type genuinely ambiguous → fire the 8-choice `AskUserQuestion` (step 4); never auto-pick.
 - state.md size cap can't be satisfied even after demotion → warn but still write; do NOT block.
 
 ## What NOT to do

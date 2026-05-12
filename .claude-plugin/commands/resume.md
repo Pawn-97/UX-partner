@@ -16,7 +16,19 @@ If missing, list available projects:
 ls -d projects/*/ 2>/dev/null
 ```
 
-…and ask the designer which one to resume.
+**★ v0.3 — Then fire `AskUserQuestion` with each project as an option** (SKILL.md § Question UI contract):
+
+```
+AskUserQuestion({
+  question: "Resume 哪个项目？",
+  options: [
+    { label: "<project-name-A>", description: "<phase from state.md frontmatter>" },
+    { label: "<project-name-B>", description: "<phase>" },
+    ...
+  ],
+  allow_other: true
+})
+```
 
 ## Steps
 
@@ -56,11 +68,24 @@ Output exactly this structure:
 
 ### 4. Suggest the next move
 
-After the summary, ask:
+After the summary, **★ v0.3 — fire `AskUserQuestion`** (SKILL.md § Question UI contract):
 
-> 想继续讨论 / 看完整 [decisions / assumptions / questions] / 直接 `/ux-project:onepage` 收尾？
+```
+AskUserQuestion({
+  question: "接下来想做什么？",
+  options: [
+    { label: "💬 Continue discussion",   description: "继续 round-N 讨论（按 state.md 推荐下一步）" },
+    { label: "📋 Read decisions.md",     description: "看完整决策列表" },
+    { label: "📋 Read assumptions.md",   description: "看完整假设列表" },
+    { label: "📋 Read questions.md",     description: "看 open / answered questions" },
+    { label: "✍️ /ux-project:onepage",   description: "直接走收尾，生成 ux-onepage.md" },
+    { label: "➕ /ux-project:add-context", description: "补背景再继续" }
+  ],
+  allow_other: true
+})
+```
 
-Wait for the designer's choice. Only then read additional files.
+Branch on the picker result. Only then read additional files.
 
 ## Failure modes
 
