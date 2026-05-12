@@ -43,16 +43,20 @@ If exit code != 0, surface the error and STOP. Don't proceed to install.
 
 ### Step 3 — Update the plugin
 
+Always use the fully-qualified name `ux-project@design-partner`. The unqualified form `ux-project` fails with "Plugin not found" even when only one plugin of that name is installed.
+
 Run:
 ```bash
-claude plugin update ux-project -s user
+claude plugin update ux-project@design-partner -s user
 ```
 
-If this fails (e.g., "already at latest"), fall back to a hard reinstall:
+If this fails (e.g., marketplace re-clone broke the registry link, or "already at latest" with no actual change), fall back to a hard reinstall:
 ```bash
-claude plugin uninstall ux-project@design-partner -s user --yes 2>/dev/null
+claude plugin uninstall ux-project@design-partner -s user
 claude plugin install ux-project@design-partner -s user
 ```
+
+`uninstall` only removes the cached plugin code at `~/.claude/plugins/cache/design-partner/ux-project/<version>/`. It does NOT touch KB / projects / settings.
 
 ### Step 4 — Snapshot new version
 
