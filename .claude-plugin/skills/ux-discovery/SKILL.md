@@ -685,6 +685,7 @@ Skill recommends closure; designer owns it. Output `Closure Readiness` summary (
 | `/ux-project:add-context <name> <text-or-path>` | ★ v0.2 — Append context, classify, propose memory writes, mark onepage stale |
 | `/ux-project:onepage` | Generate ux-onepage.md + ux-onepage.html (cite-check + memory status + outdated + diff) |
 | `/ux-project:handoff` | Generate design-brief.md for downstream design skills |
+| `/ux-project:update` ★ v0.4.1 | 一键升级插件到最新版（拉 GitHub + 重装）。不动 KB / 项目目录 / 设置 |
 
 When triggered by description match (no slash command), guide the designer toward `/ux-project:start` if no project, or `/ux-project:refine` if a project exists and they want to run/resume the 3-phase workflow.
 
