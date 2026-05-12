@@ -1,17 +1,34 @@
 # UX Partner
 
-A Claude Code plugin that turns raw PM PRDs into KB-grounded `ux-onepage.md` and `design-brief.md` through structured multi-round discovery. Built for UX designers; produces deliverables that downstream design skills (`huashu-design`, `frontend-design`, Figma) consume directly.
+A Claude Code plugin that turns raw PM PRDs into KB-grounded `ux-onepage.md` + HTML 一图流 through a **3-phase gated discovery workflow** (Understand & Expand → Evaluate & Converge → Sharpen & Ship). Built for UX designers; produces deliverables that downstream design skills (`huashu-design`, `frontend-design`, Figma) consume directly.
 
-> **Does NOT generate UI / wireframes / Figma / hi-fi mockups.** UI generation is the next skill's job. This plugin is exclusively for the discovery phase: problem framing, user/JTBD analysis, multi-round discussion, and structured handoff.
+## Scope boundary (★ v0.4 reframed)
+
+**In-scope (upstream design artifacts):**
+- ✅ Problem framing, JTBD analysis, user scenario expansion + convergence
+- ✅ **Information Architecture (IA) structure** — conceptual, no UI controls
+- ✅ **Interaction flow** — black & white flow diagrams, no visual styling
+- ✅ Container-level wireframes (boxes labelled by purpose, not by UI control)
+
+**Out-of-scope (downstream skills' job):**
+- ❌ Hi-fi UI / component-level wireframes / visual design / color / typography
+- ❌ Figma artifacts / hi-fi mockups / interactive prototypes
+- ❌ Frontend code
+
+> v0.4 reframes the boundary: IA + flow are **upstream design assets** (this plugin's job). UI styling and Figma stay downstream (`huashu-design`, `frontend-design`, Figma).
 
 ## Why this exists
 
 Designers receive PRDs that often jump straight to a UI solution before the underlying user problem is well-framed. This plugin provides a structured discovery partner that:
 
 - Reads the PRD and surfaces **possible solution bias**
-- Drives **multi-round focused discussion** (3–5 questions per round, with WHY each matters)
+- Drives **3 gated phases** with explicit designer confirmation between each
+- Expands user scenarios via **5 ideation lenses** (persona / journey / edge / error / cross-context)
+- Evaluates scenarios with a **User Value × Impl Cost × Strategic Fit rubric** and forces a "Not Doing" list
+- Captures **online behavior baseline** (current production state, existing solutions, metrics) as context-memory
 - Maintains **project-level memory** across sessions (state.md as resume gateway)
 - Enforces **cite-or-die** on the final onepage (every claim has `[ref: source]`)
+- Produces both `ux-onepage.md` (engineering / handoff) **and** `ux-onepage.html` (stakeholder-facing 一图流)
 - Detects **outdated PRD references** via frontmatter `valid_to`
 - Hands off a **clean design brief** to downstream design skills
 
@@ -162,7 +179,9 @@ Edit `QUALITY_RULES` in `.claude-plugin/scripts/index-to-context-mode.js` if you
 | `/ux-project:setup-kb <kb-path>` | One-shot KB indexing: classify + ctx_index every markdown file (idempotent) |
 | `/ux-project:start <name> <prd-path>` | Initialize project workspace from a PRD; runs initial KB analysis; proposes 3–5 first questions |
 | `/ux-project:resume <name>` | Restore project context across sessions (reads only `state.md`) |
-| `/ux-project:onepage` | Generate `ux-onepage.md` (cite-check + outdated-check enforced; designer must approve) |
+| `/ux-project:refine` ★ v0.4 | Run the 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). Each phase ends with an explicit confirmation gate via `AskUserQuestion`. Final output: `ux-onepage.md` + `ux-onepage.html` |
+| `/ux-project:add-context` | Append context, classify, propose memory writes, mark onepage stale |
+| `/ux-project:onepage` | Generate `ux-onepage.md` + `ux-onepage.html` (cite-check + outdated-check + memory status check; designer must approve) |
 | `/ux-project:handoff` | Generate `design-brief.md` for downstream design skills |
 
 ## Operating Principles (enforced)
@@ -186,26 +205,24 @@ Edit `QUALITY_RULES` in `.claude-plugin/scripts/index-to-context-mode.js` if you
 
 Override by editing `.claude-plugin/skills/ux-discovery/SKILL.md`.
 
-## Status — v0.1
+## Status — v0.4
 
 - ✅ Plugin scaffold (`plugin.json`, `marketplace.json`)
-- ✅ `ux-discovery` skill with 9 operating principles
-- ✅ 4 slash commands
-- ✅ 7 lazy templates
+- ✅ `ux-discovery` skill with 21 operating principles (v0.1 1–9 + v0.2 10–16 + v0.3 17 + v0.4 18–21)
+- ✅ 7 slash commands (including new `/ux-project:refine` 3-phase orchestrator)
+- ✅ 14 lazy templates (including `memory-baseline` and `ux-onepage.html`)
 - ✅ KB indexing script (smoke-tested on 640-file KB)
 - ✅ Curated glossary + design-principles seeds
-- ⏳ Validation: assumption #2 (huashu-design ingestion), assumption #3 (FTS5 + glossary recall ≥ 60%)
-
-## v0.2 candidates (deferred)
-
-- `claude-context` MCP integration (semantic retrieval — only if FTS5 + glossary fails recall threshold)
-- KB lint command (find stale `last_reviewed > 90 days`)
-- Cross-project decision search
-- `valid_to` aging report on PRD frontmatter
+- ✅ ★ v0.4 — 3-phase gated workflow with strong confirmation gates
+- ✅ ★ v0.4 — HTML 一图流 output (self-contained, Mermaid CDN)
+- ✅ ★ v0.4 — Scenario expansion lenses + JTBD evaluation rubric
+- ✅ ★ v0.4 — IA structure + interaction flow (B&W, no UI details)
 
 ## Documents
 
 - [`ux-discovery-skill-v0.1-onepager.md`](ux-discovery-skill-v0.1-onepager.md) — design rationale, MVP scope, assumptions to validate
+- [`ux-discovery-skill-v0.2-onepager.md`](ux-discovery-skill-v0.2-onepager.md) — v0.2 onepager
+- [`ux-discovery-skill-v0.4-onepager.md`](ux-discovery-skill-v0.4-onepager.md) — v0.4 refine onepager (3-phase + HTML)
 - [`ux_discovery_partner_skill_创建文档.md`](ux_discovery_partner_skill_创建文档.md) — original creation proposal (Chinese, historical context)
 - [`.claude-plugin/README.md`](.claude-plugin/README.md) — plugin internals
 

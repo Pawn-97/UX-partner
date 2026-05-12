@@ -1,7 +1,7 @@
 {
   "name": "ux-project",
-  "version": "0.3.0",
-  "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage and design-brief, with project-level context-memory (stakeholders/constraints/terminology/history/preferences), continuous context absorption (/ux-project:add-context + auto-propose), stale-onepage regen with diff, cross-project designer-preferences, state.md size cap, cite-or-die enforcement, and (v0.3) UI-first questioning — every designer-facing question is delivered via Claude Code's AskUserQuestion picker, not plain text. Drives multi-round discovery; does NOT generate UI/wireframes.",
+  "version": "0.4.0",
+  "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage (md + HTML 一图流) through a 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). v0.4 adds: strong phase gates with designer confirmation, scenario expansion lenses, JTBD evaluation rubric, online-behavior baseline memory, IA structure + interaction flow output (B&W, no UI details), and a self-contained HTML 一图流 deliverable. Preserves v0.3 cite-or-die, context-memory, stale detection, and AskUserQuestion UI. Does NOT generate hi-fi UI, visual styling, or Figma artifacts — those remain downstream.",
   "author": {
     "name": "GuanchengDing"
   },
@@ -14,9 +14,13 @@
     "onepage",
     "prd",
     "jtbd",
+    "ia",
+    "interaction-flow",
+    "wireframe",
     "design-partner",
     "designer",
     "memory",
-    "context-memory"
+    "context-memory",
+    "html-onepager"
   ]
 }

@@ -4,12 +4,22 @@ prd_source: ./pm-source.md
 created: <YYYY-MM-DD>
 last_updated: <YYYY-MM-DD>
 phase: intake
+phase_1_confirmed_at: null
+phase_2_confirmed_at: null
+phase_3_confirmed_at: null
 auto_propose: true
 auto_propose_mode: batched
 ---
 
 <!--
-phase enum: intake | analysis | discussion | closure-check | onepage-generated | handoff-ready
+phase enum ★ v0.4: intake | phase_1_expand | phase_2_converge | phase_3_ship | ready_for_onepage | onepage-generated | handoff-ready
+  (legacy v0.2 values "analysis | discussion | closure-check" map to phase_1_expand / phase_2_converge / phase_3_ship)
+
+★ v0.4 phase gate state contract:
+- phase advances only when designer Approves the gate AskUserQuestion (SKILL.md rule 18)
+- phase_N_confirmed_at is set on Approve and never silently cleared
+- /ux-project:resume <name> reads `phase` and `phase_N_confirmed_at` to pick up at the right place
+- Regression (designer goes back to earlier phase): set phase backward, append a decisions.md entry as audit trail; preserve confirmed-at timestamps
 
 ★ v0.2 SIZE CAP: state.md body ≤ 30 lines / < 1k tokens (excluding frontmatter and HTML comments).
 On overflow, the skill demotes the oldest Memory Index entries (entries stay in memory/<file>.md;
@@ -50,6 +60,7 @@ Only list ids; full content lives in the memory file. Update when /ux-project:ad
 - Terminology:   m-trm-001 → see memory/terminology.md
 - History:       m-hst-001 → see memory/history.md
 - Preferences:   m-prf-001 → see memory/preferences.md
+- Baseline:      m-bsl-001 / m-bsl-002 → see memory/baseline.md   ★ v0.4
 -->
 
 # Recommended Next Step
