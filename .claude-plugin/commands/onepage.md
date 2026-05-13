@@ -226,9 +226,51 @@ Once approved, write `projects/<project-name>/ux-onepage.md`:
 - Body: copy in the draft (with all refs preserved, including outdated markers if any)
 - ★ v0.2 — If banner from a stale state existed in `previous`, do NOT carry it over (regen clears stale)
 
-### 11b. ★ v0.4 — Render ux-onepage.html (stakeholder-facing minimal view)
+### 11b. ★ v0.5 — Render ux-onepage.html via huashu-md-html (report theme)
 
-> **重要 (rule 22)**: HTML 是给 stakeholder 看的精简版，不是审计版。引用 / 阶段时间戳 / 流程标签 / 长说明段 全部不显示。完整 cite 链路留在 `ux-onepage.md` 里。
+> **重要 (rule 22)**: HTML 是给 stakeholder 看的精简版，不是审计版。引用 / 阶段时间戳 / 流程标签 全部不显示。完整 cite 链路留在 `ux-onepage.md` 里。
+
+**两路径**（按 pandoc 可用性自动选）:
+
+#### Path A (default) — huashu-md-html (pandoc + report theme)
+
+1. **Check pandoc**:
+   ```bash
+   which pandoc
+   ```
+   If exit 0 → Path A. If non-zero → Path B (fallback).
+
+2. **Generate a stakeholder-friendly markdown side-file** `ux-onepage.public.md`:
+   - Copy `ux-onepage.md` content
+   - Strip every `[ref: ...]` marker (regex: `\s*\[ref:[^\]]*\]`)
+   - Strip frontmatter audit fields that stakeholders don't need (`prd_version`, `regen_count`, `phase_*_confirmed_at`, `stale*`, `html_companion`); keep just `project` + `generated` + `title` if needed
+   - Strip lines starting with `[ref:` (orphan ref lines from §15 Not Doing list)
+   - Strip `(inference)` tags — content stays
+   - Keep all mermaid code blocks intact
+   - Keep all tables intact
+   - Write to `projects/<project-name>/ux-onepage.public.md`
+
+3. **Run vendored md_to_html.py**:
+   ```bash
+   python3 .claude-plugin/vendor/huashu-md-html/scripts/md_to_html.py \
+     projects/<project-name>/ux-onepage.public.md \
+     --theme report \
+     --inline-images \
+     -o projects/<project-name>/ux-onepage.html \
+     --quiet
+   ```
+
+   Look up the vendor path via Glob `**/.claude-plugin/vendor/huashu-md-html/scripts/md_to_html.py` from cwd — DO NOT hardcode an absolute path.
+
+4. **On non-zero exit code** → emit pandoc stderr to designer in plain language, then fall through to Path B.
+
+5. **On success** → done. ux-onepage.html exists with report-theme typography. Skip step 11b's Path B block.
+
+#### Path B (fallback) — inline `ux-onepage.html.template`
+
+Used when pandoc is missing OR Path A failed. **Communicate plainly** (rule 22):
+
+> "你的电脑没装 pandoc，用我自带的精简模板生成（视觉简单点）。要想精美版，装一下：`brew install pandoc`，然后重跑 /ux-project:onepage。"
 
 Read `**/.claude-plugin/templates/ux-onepage.html.template`. 已大幅精简的 placeholder 列表：
 
@@ -288,25 +330,26 @@ Edit `projects/<project-name>/state.md`:
 
 ### 13. Closing message
 
-```
-✅ ux-onepage.md generated: projects/<project-name>/ux-onepage.md
-✅ ux-onepage.html generated: projects/<project-name>/ux-onepage.html  ★ v0.4
+说人话的收尾消息（rule 22）—— 把内部 stats 改成自然语言总结，**不报数 / 不念字段名**:
 
-Stats:
-- Sections filled: <N>/17  ★ v0.4
-- Citations: <count> total (PRD: <a>, KB: <b>, memory: <c>, decisions/assumptions: <d>, baseline: <e> ★ v0.4)
-- Scenarios mapped: <N_total> (<N_keep> KEEP, <N_cut> CUT)  ★ v0.4
-- JTBD: <N_primary> Primary / <N_secondary> Secondary / <N_anti> Anti  ★ v0.4
-- IA top-level areas: <N>  ★ v0.4
-- Flow diagram type: <flowchart | stateDiagram-v2 | sequenceDiagram>  ★ v0.4
-- Outdated refs: <count>
-- Open questions deferred: <count>
-- ★ v0.2 — Regen count: <regen_count> (<first generation | regenerated from stale>)
-
-下一步:
-- 在浏览器打开 ux-onepage.html 看 一图流 (双击或拖入浏览器)
-- /ux-project:handoff 生成给下游 design skill 的 brief
 ```
+✅ 完成了。
+
+生成了 3 个文件：
+- ux-onepage.md       完整版（带引用，给开发 / 评审 / 审计用）
+- ux-onepage.public.md 精简版（去掉引用，方便复制粘贴分享）
+- ux-onepage.html      网页版一图流（双击在浏览器打开，给老板 / 跨部门看）
+
+下一步：
+- 直接打开 ux-onepage.html 看效果
+- /ux-project:handoff 生成给下一步设计环节的简报
+```
+
+如果 Path B 兜底了，多说一句：
+> "这次用的是简版模板。装 pandoc 后下次自动用 huashu-md-html 出精美版。"
+
+**内部记账**（写进 state.md / project log，**不在 chat 念**）:
+- sections_filled, cite_counts, scenarios_keep/cut, jtbd_primary/secondary/anti, ia_areas, flow_type, outdated_refs, open_questions_deferred, regen_count, html_render_path (A=huashu / B=fallback)
 
 ## Failure modes
 
