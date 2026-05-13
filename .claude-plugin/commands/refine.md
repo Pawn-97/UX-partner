@@ -131,6 +131,43 @@ AskUserQuestion({
 
 设计师对**"已知"档**的确认本身就是对已有记忆的 re-validate——如果设计师说"要改"，把对应 memory entry 标 `superseded` 并写新条目（rule 12 memory status check）。
 
+### Step 5b — 确认 change_type（rule 24 — ★ v0.4.3）
+
+Background 维度收完、`memory/baseline.md` 写完之后，**必须**问一次：
+
+```
+AskUserQuestion({
+  question: "这次任务是哪种类型？后面画结构和流程时要不要标新旧区分？",
+  options: [
+    { label: "✨ 全新功能",         description: "之前没这功能，全新做。流程图不区分新旧" },
+    { label: "🔧 在已有功能上迭代",  description: "已有基础上加东西 / 改行为。流程图会用 ★NEW / (改造) / (已有) 三色区分" },
+    { label: "♻️ 重组已有流程",      description: "用户行为不变，重组内部流程 / 信息架构。流程图侧重标 (改造) 和 (已有)" }
+  ],
+  allow_other: true
+})
+```
+
+写到 `state.md` frontmatter `change_type`：
+- ✨ → `change_type: new_feature`
+- 🔧 → `change_type: iteration`
+- ♻️ → `change_type: refactor`
+
+**iteration / refactor 必须 cross-check**: `memory/baseline.md` 至少有 1 条 active 条目。如果没有，立刻问：
+
+```
+AskUserQuestion({
+  question: "选了在已有功能上迭代，但现在还没记录用户原来怎么用。要补一下吗？",
+  options: [
+    { label: "✏️ 我现在说",   description: "口头讲一遍用户原来的主路径，我帮你记到 baseline" },
+    { label: "🔍 我查一下再补", description: "先暂停 Phase 1，我去找现成的文档/截图" },
+    { label: "🚫 不补，硬上",   description: "（不推荐）—— 没 baseline 锚点，画出来的 (已有) 节点会被 cite-check 拦" }
+  ],
+  allow_other: true
+})
+```
+
+`new_feature` 不需要 baseline。
+
 ### Step 6 — Expand scenarios via lenses (rule 19)
 
 Pick 2–4 of the 5 lenses based on what fits this project (internal terms, **never expose to designer**):
@@ -301,11 +338,29 @@ Branch:
 
 **Goal**: IA structure + interaction flow → final `ux-onepage.md` + `ux-onepage.html`.
 
-### Step 13 — Draft IA structure (rule 21)
+### Step 13 — Draft IA structure (rule 21 + rule 24 — ★ v0.4.3)
 
 Build a nested container hierarchy. **Purpose labels only.** Forbidden: button / dropdown / modal / color / typography.
 
-Show as a tree:
+**先读 `state.md` 的 `change_type`**:
+- `new_feature` → 不标新旧，所有节点纯文本
+- `iteration` / `refactor` → 每个节点前必须带 `★NEW` / `(改造)` / `(已有)` 前缀，三类全用上（评审需要看完整结构）
+
+Iteration 模式示例（每条节点都标）:
+
+```
+<App entry point>
+├── (已有) <Top-level area 1>
+│   ├── (已有) <Section A> — <purpose label>
+│   ├── (改造) <Section B> — <purpose label，加了 SMS 状态显示>
+│   └── ★NEW <Section C> — <purpose label>
+├── ★NEW <Top-level area 2>
+│   └── ★NEW <Section D> — <purpose label>
+└── (已有) <Top-level area 3>
+    └── (已有) <Section E>
+```
+
+New_feature 模式（不带前缀）:
 
 ```
 <App entry point>
@@ -318,44 +373,105 @@ Show as a tree:
 └── ...
 ```
 
+**iteration / refactor 模式的判定来源**:
+- `★NEW` 必须 trace 到 PRD 的新需求 cite 或 §6 的某个 Primary JTBD
+- `(已有)` 必须 trace 到 `memory/baseline.md` 的某条 active 条目
+- `(改造)` 同时 trace 到 baseline（说明改造的对象）+ 新需求 cite（说明改了什么）
+
 Then fire `AskUserQuestion` per top-level area (or one gate-of-confirmation if simple). Use plain Chinese in the user-facing question:
 
 ```
 question: "这一块的内容这样组织，对吗？"
 options:
-  - "✅ 可以"        / "结构合理"
-  - "✏️ 要改"        / "某个区块要改名或调整层级"
-  - "➕ 还要补一块"  / "缺少一个区块"
-  - "🚫 删掉一块"    / "有区块多余"
+  - "✅ 可以"           / "结构合理，新旧标记也对"
+  - "✏️ 要改名或调层级" / "某个区块名 / 层级要改"
+  - "🏷️ 新旧标记不对"  / "★NEW / (改造) / (已有) 的归类要调"
+  - "➕ 还要补一块"     / "缺少一个区块"
+  - "🚫 删掉一块"       / "有区块多余"
 ```
 
-### Step 14 — Draft interaction flow
+新旧标记不对 → 让设计师指明哪个节点改归哪类；重画对应分支；re-fire。
+
+### Step 14 — Draft interaction flow (rule 21 + rule 24 — ★ v0.4.3)
 
 Pick the right diagram type based on the flow's nature:
 - **State-heavy** (entity moves through states): `stateDiagram-v2`
 - **Branch-heavy** (decision paths): `flowchart`
 - **Multi-actor**: `sequenceDiagram`
 
-Write the Mermaid source. Include:
+**先读 `state.md` 的 `change_type`**:
+- `new_feature` → 不加 classDef，节点单色
+- `iteration` / `refactor` → **必须**在图开头声明 `classDef new / modified / existing`，每个节点带 `:::new` / `:::modified` / `:::existing` 标注
+
+Iteration 模式 Mermaid 模板（直接给设计师看的版本）:
+
+```mermaid
+flowchart TD
+    classDef new fill:#fff4e6,stroke:#d97706,stroke-width:2px,color:#1a1a1a
+    classDef modified fill:#fef3c7,stroke:#b45309,stroke-width:1.5px,color:#1a1a1a
+    classDef existing fill:#f0f0eb,stroke:#999,color:#666
+
+    Entry[起点]:::existing --> Decision{<新分叉>}:::new
+    Decision -->|新情况| StateA[<新状态>]:::new
+    Decision -->|旧情况| StateB[<已有状态>]:::existing
+    StateA --> Terminal1[<新终点>]:::new
+    StateB --> Terminal2[<已有终点>]:::existing
+    StateA -.出错回退.-> Recovery[<已有兜底>]:::existing
+```
+
+New_feature 模式 Mermaid（无 classDef，所有节点同色）:
+
+```mermaid
+flowchart TD
+    Entry[起点] --> Decision{<关键分叉>}
+    Decision -->|<情况 A>| StateA[<状态名>]
+    StateA --> Terminal1[<终点>]
+```
+
+Include in every flow:
 - Entry points
 - Major branches (decisions)
 - Terminal states (success + error paths)
 - Recovery paths (from rule 19's Error & recovery lens output)
+
+iteration 模式额外要求:
+- 入口尽量从 `(已有)` 开始（用户从原来的位置进入）
+- 出错回退分支尽量回到 `(已有)` 节点（说明出错时还能回到熟悉路径）
+- `★NEW` 节点必须能 trace 到 §6 某条 JTBD 或 §14 某条 ★新增场景
 
 Show the raw Mermaid to designer; fire `AskUserQuestion` (use plain Chinese):
 
 ```
 question: "用户走的主路径，这样画对吗？"
 options:
-  - "✅ 可以"         / "主路径对"
-  - "✏️ 主路径要改"   / "主路径上某一步要调整"
+  - "✅ 可以"           / "主路径对，新旧节点归类也对"
+  - "✏️ 主路径要改"     / "主路径上某一步要调整"
+  - "🏷️ 节点新旧标错了" / "有节点的 :::new / :::existing / :::modified 归类要换"
   - "➕ 还要加一条分支" / "缺少一条情况（如错误恢复）"
-  - "🚫 删掉一条分支" / "有分支多余"
+  - "🚫 删掉一条分支"   / "有分支多余"
 ```
 
-### Step 15 — JTBD ↔ IA/flow coverage check
+### Step 15 — JTBD ↔ IA/flow coverage check (rule 21 + rule 24 — ★ v0.4.3)
 
 For each KEEP JTBD, verify it maps to ≥1 IA branch AND ≥1 flow path. If any JTBD has no coverage, flag it and ask the designer how to address (add an IA section? Flow branch? Demote the JTBD?).
+
+**iteration / refactor 模式**：覆盖图每条 trace 都要带节点类型标注，让评审看清差量。
+
+Iteration 模式覆盖图（chat 展示给设计师）:
+
+```
+- 需求 1 → ★NEW <分叉> → ★NEW <状态 A> → ★NEW <成功终点>           （全新路径）
+- 需求 2 → 已有起点 → ★NEW <分叉> → (改造) <状态 B> → 已有终点      （扩展已有路径）
+- 需求 3 → 已有起点 → (已有) 路径不变                              （行为变了，UI 不动）
+```
+
+New_feature 模式：纯路径，无类型标注。
+
+如果发现 iteration 项目里**所有**覆盖都是 ★NEW，给设计师提示：
+> "看起来这次几乎没复用已有流程，是不是其实是个全新功能而不是迭代？要不要把任务类型改成'全新功能'？"
+
+如果发现 iteration 项目里**所有**覆盖都是 (已有)，同样提示：
+> "看起来没什么新东西，是不是其实是个 refactor 或者不需要做？"
 
 ### Step 16 — Phase 3 Gate (final approval)
 

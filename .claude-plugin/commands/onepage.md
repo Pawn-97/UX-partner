@@ -21,7 +21,7 @@ You are running the `/ux-project:onepage` command. Activate the `ux-discovery` s
 ### 2. Read project state
 
 Read these files (now you can — onepage assembly needs full context):
-- `projects/<project-name>/state.md`
+- `projects/<project-name>/state.md` — **note the `change_type` frontmatter field**（new_feature / iteration / refactor / unknown）. 如果 unknown，停下来 fire AskUserQuestion 让设计师确认（rule 24）后再继续
 - `projects/<project-name>/pm-source.md` (header + `valid_to` only; don't bulk-load body)
 - `projects/<project-name>/decisions.md` (if exists)
 - `projects/<project-name>/assumptions.md` (if exists)
@@ -51,11 +51,11 @@ Sections like "Design Direction Hypothesis" that are inferences should be tagged
 
 ★ v0.4 — Fill the new sections:
 - **§5 Current (Online Baseline)**: pull from `memory/baseline.md` entries; cite each fact.
-- **§14 Scenario Map**: 6–12 rows from Phase 1; for each, the Phase 2 rubric scores + KEEP/CUT decision + cite.
+- **§14 Scenario Map**: 6–12 rows from Phase 1; for each, the Phase 2 rubric scores + KEEP/CUT decision + cite. ★ v0.4.3 — `change_type ∈ {iteration, refactor}` 时多一列"类型"（★新增 / 改造 / 复用）。
 - **§15 Not Doing**: every CUT scenario from §14, one-line reason each.
-- **§16 IA Structure**: nested tree (purpose labels, NOT UI controls). Use ASCII tree in markdown.
-- **§17 Interaction Flow**: Mermaid code block (flowchart / stateDiagram-v2 / sequenceDiagram).
-- **JTBD → coverage maps**: each KEEP JTBD must trace to ≥1 IA branch (§16 coverage map) AND ≥1 flow path (§17 coverage map). If gaps, flag in step 8 readiness check.
+- **§16 IA Structure**: nested tree (purpose labels, NOT UI controls). Use ASCII tree in markdown. ★ v0.4.3 — iteration / refactor 时每个节点前必须带 `★NEW` / `(改造)` / `(已有)` 前缀（rule 24）。new_feature 时不带前缀。
+- **§17 Interaction Flow**: Mermaid code block (flowchart / stateDiagram-v2 / sequenceDiagram). ★ v0.4.3 — iteration / refactor 时必须包含 `classDef new / modified / existing` 三色定义 + 每节点 `:::class` 标注（rule 24）。new_feature 时不带 classDef。
+- **JTBD → coverage maps**: each KEEP JTBD must trace to ≥1 IA branch (§16 coverage map) AND ≥1 flow path (§17 coverage map). If gaps, flag in step 8 readiness check. ★ v0.4.3 — iteration / refactor 时每条 trace 都标节点类型。
 
 ### 5. Run cite-check
 
@@ -80,6 +80,29 @@ Onepage 未生成。补完 ref 后重跑 `/ux-project:onepage`。
 ```
 
 Do not write the file when blocked.
+
+### 5b. ★ v0.4.3 — Iteration cite-check（rule 24）
+
+仅在 `change_type ∈ {iteration, refactor}` 时跑：
+
+1. 扫 §16 IA 树和 §17 Mermaid 图，统计每个 `(已有)` / `(改造)` 节点 / `:::existing` / `:::modified` 节点。
+2. 每个标 `(已有)` 或 `:::existing` 的节点**必须**对应 `memory/baseline.md` 的某条 active 条目（按内容语义匹配，不要求字面相等）。
+3. 如果发现孤立的 `(已有)` 节点（baseline 没有对应锚点），BLOCK：
+
+```markdown
+## ⚠️ Iteration 标记锚点缺失
+
+下列节点标了 (已有) 或 :::existing 但 `memory/baseline.md` 没有对应条目：
+
+1. §16 "Section A" — 没找到锚点
+2. §17 "已有终点 Recovery" — 没找到锚点
+
+要么补 baseline 条目，要么改标记为 ★NEW。Onepage 未生成。
+```
+
+类似地，`★NEW` / `:::new` 节点必须能 trace 到某条 KEEP JTBD 或 PRD 新需求 cite；`(改造)` / `:::modified` 必须同时 trace 到 baseline + 新 cite。
+
+如果 `change_type == new_feature` 但 §16 / §17 里出现 `(已有)` / `(改造)` / `:::existing` / `:::modified` 标记，也 BLOCK（要么改类型，要么删标记）。
 
 ### 6. ★ v0.2 — Run memory status check
 
@@ -223,6 +246,7 @@ Once approved, write `projects/<project-name>/ux-onepage.md`:
   - `project`, `generated: <today>`, `prd_source: ./pm-source.md`, `prd_version: <v>`
   - ★ v0.2 — `stale: false`, `stale_reason: null`, `last_regen: <today>`, `regen_count: <previous_count + 1>` (or `0` if first gen)
   - ★ v0.4 — `phase_1_confirmed_at`, `phase_2_confirmed_at`, `phase_3_confirmed_at` (copy from state.md), `html_companion: ./ux-onepage.html`
+- ★ v0.4.3 — `change_type` (copy from state.md — drives §14/§16/§17 rendering convention)
 - Body: copy in the draft (with all refs preserved, including outdated markers if any)
 - ★ v0.2 — If banner from a stale state existed in `previous`, do NOT carry it over (regen clears stale)
 
@@ -239,7 +263,9 @@ Read `**/.claude-plugin/templates/ux-onepage.html.template`. 已大幅精简的 
 | `{{PROBLEM_FRAMING}}` | §2 现状+真正要解决的事（1–2 短句；strip cite markup） |
 | `{{PRIMARY_USER}}` / `{{SECONDARY_USERS}}` | §4 短标签 |
 | `{{BASELINE_BULLETS_HTML}}` | each active `memory/baseline.md` entry → `<li>content</li>`（**不带 sup ref**，纯文本） |
-| `{{SCENARIO_ROWS_HTML}}` | §14 rows; KEEP → `td.decision-keep`, CUT → `td.decision-cut`; lens label in `<span class="lens-tag">`（标签短到 4 字以内：时机 / 跨场景 / 用户 / 边界 / 出错） |
+| `{{SCENARIO_ROWS_HTML}}` | §14 rows; KEEP → `td.decision-keep`, CUT → `td.decision-cut`; lens label in `<span class="lens-tag">`（标签短到 4 字以内：时机 / 跨场景 / 用户 / 边界 / 出错）。★ v0.4.3 — iteration 项目额外一列 `<span class="change-tag change-new\|change-mod\|change-existing">★新增/改造/复用</span>` |
+| `{{IA_TREE_HTML}}` (iteration / refactor) | 节点前缀 `★NEW` 用 `<span class="ia-new">★NEW</span>`，`(改造)` 用 `<span class="ia-mod">改造</span>`，`(已有)` 用 `<span class="ia-existing">已有</span>`。`<style>` 段内三类 CSS：`.ia-new{color:#d97706;font-weight:600}`、`.ia-mod{color:#b45309}`、`.ia-existing{color:#999}` |
+| `{{MERMAID_FLOW_SRC}}` (iteration / refactor) | 原样保留 `classDef new / modified / existing` 定义 + 节点的 `:::class` 标注。Mermaid 会自动渲染三色——HTML 端不要剥离这些标记 |
 | `{{NOT_DOING_BULLETS_HTML}}` | §15 list → `<li><b>S<n>: name</b> — reason</li>`（无 ref） |
 | `{{JTBD_CARDS_HTML}}` | §6 cards. Primary → `<div class="jtbd-card">`; Anti → `<div class="jtbd-card anti">`. 卡片 body: `<div class="id">需求 N · 核心</div><div class="text">短句, b 标签包关键动作</div><span class="priority">S1 · S3</span>`（priority chip 只放对应场景 ID，不写"对应场景："前缀） |
 | `{{IA_TREE_HTML}}` | §16 嵌套 `<ul><li>name <span class="purpose">— purpose</span></li></ul>`。purpose 文字短，≤ 20 字 |
@@ -330,3 +356,5 @@ Stats:
 - ★ v0.4 — Don't generate `ux-onepage.html` if `ux-onepage.md` cite-check failed. HTML must reflect the validated markdown source.
 - ★ v0.4 — Don't put `<sup class="ref">` markers in HTML body, don't render `<div class="footnotes">`, don't render `<span class="phase-tag">`, don't render `<p class="lede">` sections. HTML is the stakeholder minimal view; cite trail lives in .md (rule 22).
 - ★ v0.4 — Don't include header meta row (PRD version / date / regen count) or phase confirmation strip in HTML. 单一 h1 标题足够 (rule 22)。
+- ★ v0.4.3 — Don't render `★NEW / (改造) / (已有)` markers when `change_type == new_feature` (rule 24). Conversely, don't omit them when `change_type ∈ {iteration, refactor}`.
+- ★ v0.4.3 — Don't strip Mermaid `classDef` / `:::class` annotations when piping `{{MERMAID_FLOW_SRC}}` — they carry the new/existing visual signal.

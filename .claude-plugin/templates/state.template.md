@@ -9,6 +9,7 @@ phase_2_confirmed_at: null
 phase_3_confirmed_at: null
 auto_propose: true
 auto_propose_mode: batched
+change_type: unknown
 ---
 
 <!--
@@ -31,7 +32,14 @@ Other project files (decisions/assumptions/questions/memory/*) are read on deman
 ★ v0.2 auto-propose config:
 - auto_propose: true (default) | false → controls whether the skill auto-proposes memory entries from conversation
 - auto_propose_mode: batched (default, every 5 rounds) | per-utterance (high noise, not recommended)
+
+★ v0.4.3 change_type ★:
+- new_feature: 全新功能，没有已有流程要保留 → IA / 流程不需要区分新旧
+- iteration:   在已有功能基础上的增量改动 → IA / 流程必须标 "★ NEW / (改造) / (已有)"
+- refactor:    重组已有流程，无新用户可见行为 → 同 iteration，标记侧重 (改造) 和 (已有)
+- unknown:     默认初值，Phase 1 baseline 收集后必须由设计师确认（不能跨过 Phase 1 gate 仍 unknown）
 -->
+
 
 # Current Understanding
 

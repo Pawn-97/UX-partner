@@ -280,7 +280,24 @@ Hi-fi UI generation, visual styling, and Figma artifacts are handled by `huashu-
     **How to apply**: Phase 1 Step 3（"背景收集"）的 5 个维度——主用户 / 成功标准 / 约束 / 现状基线 / 历史尝试——每一个都先跑一轮 `ctx_search`（≤ 2 个 query）+ 读 memory，再决定是确认还是开问。**搜索过程对设计师静默**，只展示结果（说人话：不是"我在 KB 里 search 了..."而是"我在你之前的项目记录和知识库里找了一下..."）。
     **覆盖范围**: 仅限 Phase 1 背景收集环节。Phase 2/3 的判断/决策仍走对话主导，不需要每个问题都先查 KB。
 
-> Principles 15 + 16 borrowed from [lsdefine/GenericAgent](https://github.com/lsdefine/GenericAgent) (L1 hard cap + read-side hint patterns; researched 2026-05-08). Principle 17 leverages Claude Code's built-in `AskUserQuestion` tool for high-signal structured input. Principles 18–21 inspired by [`idea-refine`](https://github.com/anthropics/agent-skills) divergent → convergent → concrete paradigm, adapted for UX requirement discovery. Principle 22 enforces designer-friendly plain-language output. Principle 23 prevents redundant questioning by sweeping existing context first — borrowed insight from PM workflow tools: "don't ask what's already been answered."
+24. **★ v0.4.3 — Iteration awareness（新增 vs 已有的区分）.** 一个 UX 任务可能是**全新功能**，也可能是**对已有功能的迭代/改造**。两者的 onepage 输出必须不同：
+
+    - `change_type: new_feature` — 全新功能，IA / 流程图 / 场景表**不需要**区分新旧，所有节点同色
+    - `change_type: iteration` — 在已有功能上加东西 / 改行为，IA / 流程 / 场景表**必须**用 `★NEW / (改造) / (已有)` 三类标记区分增量与存量
+    - `change_type: refactor` — 重组已有流程无新用户可见行为，标记侧重 `(改造)` 和 `(已有)`，`★NEW` 极少
+    - `change_type: unknown` — Phase 1 baseline 收集完后**必须**问设计师确认（不能跨 Phase 1 gate 仍 unknown）
+
+    **判定时机**: Phase 1 Step 4 已知/不全/没有分流之后，紧接着 fire 一个 `AskUserQuestion`，options: ✅ 全新功能 / ✏️ 在已有功能上迭代 / 🔧 重组已有流程 / Other。结果写到 `state.md` frontmatter `change_type`，同步到生成的 `ux-onepage.md` frontmatter。
+    **Iteration 模式的强约束**：
+    - `memory/baseline.md` **必须**有至少 1 条 active 条目描述已有流程的入口/主路径——cite-check 阶段如果 §16 里出现 `(已有)` 但 `memory/baseline.md` 为空，BLOCK
+    - §14 场景表多一列"类型"（★新增 / 改造 / 复用）
+    - §16 IA 树每个节点带前缀（`★NEW` / `(改造)` / `(已有)`）
+    - §17 Mermaid 图带 `classDef new / modified / existing` 三色着色 + 每节点 `:::class` 标注
+    - 覆盖图（JTBD → IA 节点 / JTBD → flow 路径）显式标节点类型
+    **可见性**: `★NEW / (改造) / (已有)` 是设计师/评审都需要看的视觉信号，**保留在 `ux-onepage.html` 一图流里**（不在 rule 22 的禁用范围内——这不是流程黑话，是产品差量语言）。
+    **Why**: 评审看 onepage 时第一个问题往往是"哪些是新做的、哪些不动？" 没有这层标记，评审要拿旧文档 vs 新 onepage 对比才能看出差量，浪费所有人时间。
+
+> Principles 15 + 16 borrowed from [lsdefine/GenericAgent](https://github.com/lsdefine/GenericAgent) (L1 hard cap + read-side hint patterns; researched 2026-05-08). Principle 17 leverages Claude Code's built-in `AskUserQuestion` tool for high-signal structured input. Principles 18–21 inspired by [`idea-refine`](https://github.com/anthropics/agent-skills) divergent → convergent → concrete paradigm, adapted for UX requirement discovery. Principle 22 enforces designer-friendly plain-language output. Principle 23 prevents redundant questioning by sweeping existing context first — borrowed insight from PM workflow tools: "don't ask what's already been answered." Principle 24 distinguishes increment from stock so reviewers see the diff at a glance — borrowed insight from product release notes / changelogs: "show what changed, not just what is."
 
 ## Question UI contract (★ v0.3)
 
@@ -802,3 +819,7 @@ If you find yourself doing any of these, stop and reset:
 - ★ v0.4.2 — chat 里用 "透镜" / "棱镜" 这种 "lens" 的中文化译法 (rule 22.1)
 - ★ v0.4.2 — chat 里报数 "KEEP 9 / CUT 1" 或写 "JTBD-N (← Sn)" 映射记账 (rule 22.1)
 - ★ v0.4.2 — chat 里出现 "Step N" / "Asked Phase N gate" 这类内部 step / 流程标签 (rule 22.1)
+- ★ v0.4.3 — Phase 1 baseline 收集完后 `change_type` 仍 `unknown` 就跨过 Phase 1 gate (rule 24)
+- ★ v0.4.3 — iteration / refactor 项目的 §16 IA 树 / §17 Mermaid 流程图缺少 `★NEW / (改造) / (已有)` 标记 (rule 24)
+- ★ v0.4.3 — iteration 项目 §16 里有 `(已有)` 节点但 `memory/baseline.md` 为空（无锚点） (rule 24)
+- ★ v0.4.3 — new_feature 项目硬塞 `(已有)` 标记装作迭代 / iteration 项目把 `★NEW` 当饰品乱贴 (rule 24)
