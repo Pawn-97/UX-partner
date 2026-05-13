@@ -741,7 +741,7 @@ Skill recommends closure; designer owns it. Output `Closure Readiness` summary (
 | `/ux-project:resume <name>` | Restore project context (reads state.md only); resumes from last confirmed phase |
 | `/ux-project:refine` ★ v0.4 | Run the 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). Each phase ends with a mandatory `AskUserQuestion` gate. Phase 3 closure triggers `/ux-project:onepage` |
 | `/ux-project:add-context <name> <text-or-path>` | ★ v0.2 — Append context, classify, propose memory writes, mark onepage stale |
-| `/ux-project:onepage` ★ v0.5 | Generate ux-onepage.md + ux-onepage.public.md + ux-onepage.html. HTML 默认走 vendored huashu-md-html (pandoc + report 主题)；pandoc 缺失时回退到内置精简模板 |
+| `/ux-project:onepage` | Generate ux-onepage.md + ux-onepage.html (cite-check + memory status + outdated + diff) |
 | `/ux-project:handoff` | Generate design-brief.md for downstream design skills |
 | `/ux-project:update` ★ v0.4.1 | 一键升级插件到最新版（拉 GitHub + 重装）。不动 KB / 项目目录 / 设置 |
 
@@ -764,7 +764,7 @@ These are v0.4 defaults. Change them by editing this SKILL.md or via discussion 
 - **PRD upgrade** ★ v0.2: hybrid prompt, default lazy
 - **Scenario expansion target** ★ v0.4: 6–12 scenarios (hard cap 15)
 - **JTBD rubric columns** ★ v0.4: `User Value × Impl Cost × Strategic Fit → KEEP / CUT`
-- **HTML output** ★ v0.5: 默认走 vendored [huashu-md-html](https://github.com/alchaincyf/huashu-md-html) (`.claude-plugin/vendor/huashu-md-html/scripts/md_to_html.py` + `templates/report/theme.css`) — 精美 publishing-grade typography。同时生成 `ux-onepage.public.md`（去引用版）作为 pandoc 输入。pandoc 缺失 / 渲染失败时回退到 v0.4 内置 `ux-onepage.html.template`
+- **HTML output** ★ v0.4: self-contained `ux-onepage.html` (inline CSS + Mermaid CDN); rendered as 一图流
 
 ## Failure modes to watch
 

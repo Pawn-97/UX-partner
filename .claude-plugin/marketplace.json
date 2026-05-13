@@ -7,8 +7,8 @@
     {
       "name": "ux-project",
       "source": "./.claude-plugin",
-      "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage (md + HTML 一图流) via a 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). v0.5 vendors huashu-md-html (alchaincyf) for publishing-grade HTML output via pandoc + report theme; v0.4 added phase gates, scenario lenses, JTBD rubric, online-behavior baseline memory, IA + interaction flow output (B&W), 说人话规范 covering all designer-facing text, KB-first background gathering, and /ux-project:update for one-command plugin upgrades. Preserves v0.3 cite-or-die, context-memory, stale detection, and AskUserQuestion UI.",
-      "version": "0.5.0",
+      "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage (md + HTML 一图流) via a 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). v0.4.x adds: phase gates, scenario lenses, JTBD rubric, online-behavior baseline memory, IA + interaction flow output (B&W), 说人话规范 covering all designer-facing text, KB-first background gathering (rule 23), and /ux-project:update for one-command plugin upgrades. Preserves v0.3 cite-or-die, context-memory, stale detection, and AskUserQuestion UI.",
+      "version": "0.4.2",
       "author": {
         "name": "GuanchengDing"
       }
