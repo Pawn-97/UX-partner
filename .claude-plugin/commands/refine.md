@@ -133,27 +133,40 @@ AskUserQuestion({
 
 ### Step 6 — Expand scenarios via lenses (rule 19)
 
-Pick 2–4 of the 5 lenses based on what fits this project:
-- **Persona shift**
-- **Journey stage shift**
-- **Edge case lens**
-- **Error & recovery lens**
-- **Cross-context lens**
+Pick 2–4 of the 5 lenses based on what fits this project (internal terms, **never expose to designer**):
+- Persona shift
+- Journey stage shift
+- Edge case lens
+- Error & recovery lens
+- Cross-context lens
 
-Generate **6–12 scenarios** (hard cap 15). For each scenario:
+Generate **6–12 scenarios** (hard cap 15). Internally track per scenario:
 - Name (short noun phrase)
 - One-line description
-- Lens label
-- Initial cite
+- Which lens generated it (for audit only)
+- Initial cite (for `ux-onepage.md` only)
 
-Output as a table in chat:
+**Two output surfaces** (rule 22.1.1 — chat vs file):
+
+**A. Chat (给设计师看的)** — 极简表，**不带 Lens 列 / 不带 Cite 列 / 不写"用透镜扩展"**:
 
 ```
-| # | Scenario | Lens | One-line | Cite |
-|---|----------|------|----------|------|
-| S1 | <name> | Persona shift | <description> | [ref: ...] |
+| # | 用户场景 | 一句话描述 |
+|---|---------|-----------|
+| S1 | <name> | <description> |
+| S2 | <name> | <description> |
 | ... |
 ```
+
+开场白也别说"我用 4 个透镜扩展了场景"——直接说："我从几个角度想了一遍，列了 N 个用户会遇到的情况："
+
+**B. 内部记账（写进 state / memory / 后续 ux-onepage.md）** — 完整带 Lens + Cite:
+
+```
+S1: <name> | lens=persona_shift | <description> | [ref: pm-source.md L46-56; m-cst-003]
+```
+
+这部分**绝不在 chat 里出现**，写文件就行。
 
 ### Step 7 — Phase 1 Gate
 
@@ -184,54 +197,75 @@ Branch:
 
 **Goal**: Apply rubric → KEEP / CUT scenarios → JTBD list + Not Doing list.
 
-### Step 8 — Apply rubric to each scenario (rule 20)
+### Step 8 — 一条条判断做不做 (rule 20)
 
-For each Phase 1 scenario, draft a row:
+**内部** 给每条场景打三维分（User Value × Impl Cost × Strategic Fit）→ 做 / 不做 草案。这一步**纯内部 reason**，**不要把 rubric 表 / KEEP/CUT 字样 / High/Medium/Low 评分摆给设计师看**。
 
-```
-| # | Scenario | User Value | Impl Cost | Strategic Fit | Decision (your draft) |
-|---|----------|-----------|-----------|---------------|----------------------|
-| S1 | <name> | High | Medium | Core | KEEP |
-| S2 | <name> | Low | High | Edge | CUT |
-| ... |
-```
-
-**Be honest, not supportive** (per SKILL.md). Push back on weak scenarios:
-- "Low frequency vitamin — recommend CUT"
-- "Looks core but Impl Cost High this quarter — propose deferring to v2"
-
-For each draft decision, fire `AskUserQuestion` (one per scenario, or batched 3–4 obviously-similar). Use plain Chinese in user-facing text (rule 22):
+**Chat 里展示给设计师的形式**（rule 22.1.1 — chat 极简）:
 
 ```
-question: "场景 S<n>「<name>」—— 我建议<要做 / 不做>，理由：<一句话>。你同意吗？"
+question: "场景「<name>」—— 我建议<做 / 不做>，原因：<一句话>。你同意吗？"
 options:
-  - "✅ 要做"           / "保留，进入用户需求清单"
-  - "🚫 不做"           / "放进'明确不做'，写明理由"
-  - "✏️ 理由要改"       / "决定可能对，但理由需要修"
+  - "✅ 做"           / "留进用户需求清单"
+  - "🚫 不做"          / "放进'明确不做'，记下理由"
+  - "✏️ 理由要改"      / "决定可能对，但理由要修"
 ```
+
+可以 batch（3–4 条明显同类的一起问），但**不要贴整张 rubric 表** / 不要写 "KEEP 9 / CUT 1"。
+
+**内部记账**（写文件，不进 chat）—— 完整 rubric 表带分数 + 决定，存到 `state.md` 或 phase 2 中间文件，最终写进 `ux-onepage.md`:
+
+```
+S1 | uv=High imp=Med fit=Core | decision=KEEP | reason=<...>
+S2 | uv=Low imp=High fit=Edge | decision=CUT  | reason=<...>
+```
+
+**Be honest, not supportive** (per SKILL.md). 不当 yes-man:
+- "频率太低，建议不做"
+- "看起来核心但本季工程量太大，建议挪到 v2"
+
+直接说人话，不说 "Low frequency vitamin" / "Impl Cost High"。
 
 ### Step 9 — Build the Not Doing list
 
-Every CUT must have a one-line reason. Format:
+每条"不做"都要一句话理由。
 
+**Chat 展示**（极简、不带 ref / 不带 S 号映射）:
 ```
-- **S<n>: <scenario name>** — <one-line reason> [ref: ...]
-```
-
-Reasons should be specific: scope decision, frequency too low, owned by adjacent team, technical blocker, etc.
-
-### Step 10 — Convert KEEP set to JTBD
-
-For each KEEP scenario, format as JTBD:
-
-```
-JTBD-<n>: When <situation>, I want to <action>, so I can <outcome>. [ref: ...]
+- <场景名> — <一句话理由>
 ```
 
-Cluster into:
-- **Primary JTBD** (the core 1–3 jobs)
-- **Secondary JTBD** (supporting jobs)
-- **Anti-JTBD** (what user does NOT want — at least 1)
+**文件版**（写进 ux-onepage.md 的"明确不做"section）带完整 cite:
+```
+- S<n>: <scenario name> — <reason> [ref: ...]
+```
+
+理由要具体：范围决定 / 频率太低 / 邻队负责 / 技术阻塞 等。
+
+### Step 10 — 把"做"的转成用户需求 (JTBD)
+
+对每条 KEEP 场景写成 JTBD 句式：`当 <情境>，我想 <动作>，从而 <目的>`。
+
+**Chat 展示**（rule 22.1.1）—— **不带 (← Sn) 映射，不带 [ref:...]，不报"D1 直接驱动的 N 个"等内部计数**:
+
+```
+Primary JTBD（核心需求）
+- JTBD-1：当我作为 <角色> 在 <情境>，我想 <动作>，从而 <目的>。
+- JTBD-2：...
+
+Secondary JTBD（细化交互）
+- JTBD-5：...
+- ...
+
+Anti-JTBD（不想要的）
+- 不想要 <情况>
+- ...
+```
+
+**文件版**（写进 `ux-onepage.md`）—— 带 ref + S 号映射 + 内部 id，供后续审计:
+```
+JTBD-1 (← S1) | Primary | When ..., I want ..., so I can ... | [ref: pm-source.md L83 P0-1; m-cst-003]
+```
 
 ### Step 11 — Render Phase 2 HTML preview (optional, for designer review)
 

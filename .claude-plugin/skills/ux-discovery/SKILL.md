@@ -102,7 +102,9 @@ Hi-fi UI generation, visual styling, and Figma artifacts are handled by `huashu-
 
     **流程阶段类**:
     - ❌ "Phase 1 / Phase 2 / Phase 3 / 阶段一 / 阶段二" — 设计师不需要知道流程编号
-    - ❌ "round 1 / 第 N 轮" — 内部计数，别念
+    - ❌ "Step 1 / Step 6 / Step N" — 内部 step 标题不展示给设计师
+    - ❌ "round 1 / 第 N 轮 / Round 1" — 内部计数，别念
+    - ❌ "Asked Phase N gate" / "Phase N gate" / "Phase N 收尾" — UI 上别贴流程标签
 
     **结构方法类**（用户最反感的一类）:
     - ❌ "rubric / 评分卡 / 评估矩阵" → 改成 "一条条看" / "判断标准" / 直接不说
@@ -110,11 +112,13 @@ Hi-fi UI generation, visual styling, and Figma artifacts are handled by `huashu-
     - ❌ "workflow / pipeline / 流水线" → "流程" / 直接不说
     - ❌ "gate / 卡点 / 关卡" → "确认一下" / "看你 OK 不"
     - ❌ "artifact / deliverable / 产出物 / 交付物" → "文件" / "结果" / "一图流"
-    - ❌ "lens / 视角维度" → "几个角度" / 直接不说
+    - ❌ "lens / 透镜 / 棱镜 / 视角维度" → "几个角度" / 直接不说（**核心黑话，包括中文化版本**）
+    - ❌ "Persona shift / Journey stage shift / Edge case / Error & recovery / Cross-context" 作为**列名 / 标签暴露给设计师** — 改成中文自然描述（"换一类用户" / "前后阶段" / "极端情况" / "错了怎么办" / "跨场景")，或者干脆不显示这一列
     - ❌ "converge / diverge / 收敛 / 发散" → 做就行，不用宣告动作
     - ❌ "framing / 框定 / baseline framing" → "理清楚" / "现在是怎么用的"
-    - ❌ "scenario expansion" → "把用户场景想一遍"
-    - ❌ "KEEP / CUT" → "做 / 不做" / "留 / 砍"
+    - ❌ "scenario expansion / 用透镜扩展场景" → "把用户场景想一遍"
+    - ❌ "KEEP / CUT / KEEP-degrade / KEEP 9 / CUT 1 计数" → "做 / 不做" / "留 / 砍"，**不要报数 "KEEP 9 / CUT 1"**
+    - ❌ "JTBD-N (← Sn)" / "S5 → KEEP / S8 → 中等" 这类映射记账 → 用户不关心 ID 链路；要么纯编号要么纯文字
     - ❌ "conceptual / 概念层 / 抽象层" → 直接不说
     - ❌ "iterate / 迭代一下" → "改一版" / "再调一轮"
     - ❌ "audit / 审计 / 审一遍" → "检查一遍"
@@ -126,14 +130,43 @@ Hi-fi UI generation, visual styling, and Figma artifacts are handled by `huashu-
     **机器口吻类**:
     - ❌ "the skill / this command / this generation" — 不要让产出听起来像机器在做事
     - ❌ 中英混杂术语句（"用 5 个 lens 展开 scenarios" / "跑一遍 rubric"）
-    - ❌ 念字段名（`phase`、`status: active`、`m-cst-001`、`auto_propose`、`prd_version_at_write`）
+    - ❌ 念字段名（`phase`、`status: active`、`m-cst-001`、`auto_propose`、`prd_version_at_write`、`date:`、`decision:`、`reason:`、`impact:`、`supersedes:`）
+    - ❌ **把 memory entry / decision entry 的 YAML frontmatter 当成 bullet list 念给设计师听** — 这是文件结构，不是对话内容。要说就用自然语句（"这条决定是 X，因为 Y"），不要分字段列出来
     - ❌ "n/a" / "TBD" 直接显示 — 改成 "暂未确定" / "待补充"
+
+    **引用噪音类（★ 新增）**:
+    - ❌ chat 对话里嵌入 `[ref: pm-source.md L83 P0-1; m-cst-003]` 这样的引用标记 — 引用是 `ux-onepage.md` 文件里的硬要求（cite-or-die），**但 chat 里是纯噪音**，设计师没法点也读不懂
+    - ❌ 表格里加 "Cite" 列展示给设计师 — 同理，cite 信息留在 .md 文件里
+    - ❌ "[ref: D1; m-bsl-002]" 这类内部 id 列表 — 设计师不知道 D1 是啥
 
     **Allowed industry terms** (designer 行业通用，可保留):
     - ✅ JTBD / 信息架构 (IA) / 交互流程 / 用户场景 / 痛点 / 假设 / 约束 / 边界 / 主路径 / 错误恢复
     - ✅ 首次出现时带一句话语境，让非设计师 stakeholder 也能看懂
 
     **Rule of thumb**: 如果一个词需要"先解释一下这个词"才能让设计师懂，那它就是黑话——换掉。
+
+    ### 22.1.1 Chat vs 文件的两套规矩（★ 关键新增）
+
+    Chat 对话和生成的 `ux-onepage.md` / `decisions.md` / `memory/*.md` 是**两个不同的读者面**，规则不同：
+
+    | 内容 | chat 对话 | ux-onepage.md / memory 文件 |
+    |---|---|---|
+    | `[ref: pm-source.md L12]` 引用 | ❌ 不出现 | ✅ 必须出现（cite-or-die） |
+    | `m-cst-001` 等内部 id | ❌ 不出现 | ✅ 出现 |
+    | 字段名（date / decision / reason） | ❌ 不念，用自然语句 | ✅ 文件里是 YAML / bullet |
+    | Step N / Phase N 标题 | ❌ 不展示 | ❌ 也不展示 |
+    | Lens 列 | ❌ 不展示 | 可选保留（内部审计用） |
+    | 场景 / JTBD / 决定的**内容** | ✅ 展示 | ✅ 展示 |
+
+    **核心原则**：chat 是给设计师**做决定**用的，只展示决定所需的最小信息。文件是给评审 / 审计 / 后续设计师 reference 用的，要带完整 cite 链路。**不要把文件结构原样搬进 chat**。
+
+    **反例**（之前对话里出现的）:
+    > ❌ JTBD-1 (← S1)：当我作为小企业 admin 把 toll 号码 port 到 Zoom 且已有 Active Campaign 时，我想在同一流程里说"这些号码也启 SMS"，从而避免 Voice 上线后再单独跑一遍 SMS 配置 [ref: pm-source.md L83 P0-1; m-cst-003]
+
+    **正例**:
+    > ✅ JTBD-1：当我作为小企业 admin 把 toll 号码 port 到 Zoom 且已有 Active Campaign 时，我想在同一流程里说"这些号码也启 SMS"，从而避免 Voice 上线后再单独跑一遍 SMS 配置
+
+    完整带 ref 的版本写进 `ux-onepage.md`，chat 里只看清爽内容。
 
     ### 22.2 短到极致（concision）
 
@@ -224,9 +257,14 @@ Hi-fi UI generation, visual styling, and Figma artifacts are handled by `huashu-
     - 任一 `<li>` 文字 ≤ 30 字（个别允许 50 字，但平均要短）
 
     **对话流自查**（每次给设计师发文本前内部默念）:
-    - 有没有出现**流程阶段词**（Phase / round / 阶段一）？删。
-    - 有没有出现**结构方法词**（rubric / protocol / workflow / pipeline / gate / artifact / deliverable / lens / framing / baseline / converge / diverge / KEEP / CUT / conceptual / iterate / audit / cite-check / propose / stale / trigger）？换成大白话。
-    - 有没有**念字段名**（`phase_2_confirmed_at` / `auto_propose` / `m-cst-001` / `status: active`）？删，静默写文件。
+    - 有没有出现**流程阶段词**（Phase / round / 阶段一 / Step N / Asked Phase N gate）？删。
+    - 有没有出现**结构方法词**（rubric / protocol / workflow / pipeline / gate / artifact / deliverable / lens / **透镜 / 棱镜** / framing / baseline / converge / diverge / KEEP / CUT / conceptual / iterate / audit / cite-check / propose / stale / trigger）？换成大白话。
+    - 有没有**念字段名**（`phase_2_confirmed_at` / `auto_propose` / `m-cst-001` / `status: active` / `date:` / `decision:` / `reason:` / `impact:` / `supersedes:`）？删，静默写文件。
+    - 有没有把 memory / decision **YAML frontmatter 当 bullet 念出来**？改成 1-2 句自然描述。
+    - 有没有 chat 里嵌 `[ref: pm-source.md ...]` / `[ref: m-cst-001]`？删，引用只进 `ux-onepage.md` 文件。
+    - 表格里有没有 "Cite" 列 / "Lens" 列暴露给设计师？删列。
+    - 有没有 "JTBD-N (← Sn)" / "S5 → KEEP" / "KEEP 9 / CUT 1" 这种映射记账？删。
+    - 有没有 "Persona shift / Edge case / Error & recovery" 直接当表头？换中文自然描述或删列。
     - 有没有**中英混杂**（"用 lens 展开 scenarios"）？纯中文重写。
     - 这段话能不能**再短一半**？能就短。
     - 是不是在**解释"我刚才在做什么"**？设计师能看到结果，删掉过程描述。
@@ -522,23 +560,43 @@ Two memory tiers in v0.2:
 
 Before writing to ANY memory file:
 
-1. **Show the proposed entry first**:
+1. **Show the proposed entry first**——**用自然语句，别把 YAML 字段当 bullet 念**（rule 22.1 / 22.1.1）:
+
+   ✅ **正确（chat 极简版，给设计师看）**:
    ```
-   Proposed entry for <file>:
-   - Type: <type>
-   - id: <D<n> | A<n> | Q<n> | m-<prefix>-<hash>>
-   - Content: <text>
-   - Source: <discussion turn / PRD / KB ref / colleague feedback>
-   - Confidence: high/medium/low
-   - prd_version_at_write: <current pm-source.md version>
+   想记一条<决定 / 约束 / 假设>：<一句话内容>。
+   依据：<一句话来源（"你刚说的" / "PRD L83" / "PM 反馈" 等自然描述）>
+   记吗？
+   ```
+
+   ❌ **错误（之前的版本——别再这样输出）**:
+   ```
+   Proposed entry for decisions.md:
+   - Type: decision
+   - id: D4
+   - date: 2026-05-13
+   - decision: ...
+   - reason: ...
+   - impact: ...
+   - supersedes: —
    - status: active
-   - Date: <today>
-   
+   - confidence: high
    记入吗？(yes / edit / skip)
    ```
-2. **Wait for designer confirm.**
-3. **Then append** (never overwrite existing entries).
-4. **Never** write inferred details that the designer didn't explicitly state.
+   字段名 `date / decision / reason / impact / supersedes / id / status / confidence` **统统不在 chat 里出现**。这些是写到文件里的 YAML 字段，设计师不需要看。
+
+2. **静默记录字段**（agent 内部填，写文件时一次性带进去）:
+   - `type` / `id` / `confidence` / `prd_version_at_write` / `status: active` / `date`
+   - 这些都不在 chat 里念
+
+3. **`AskUserQuestion` 走标准确认**:
+   ```
+   options: ["✅ 记", "✏️ 改一下再记", "🚫 不记"]
+   ```
+
+4. **Wait for designer confirm.**
+5. **Then append** (never overwrite existing entries).
+6. **Never** write inferred details that the designer didn't explicitly state.
 
 ## ★ v0.2 — Auto-memory propose
 
@@ -738,3 +796,9 @@ If you find yourself doing any of these, stop and reset:
 - ★ v0.4 — 对话里解释 agent 自己在做什么（"我现在 propose 到 memory/constraints" / "我跑完了 rubric"）而不是直接给结果 (rule 22.5)
 - ★ v0.4 — Phase 1 没先扫 `pm-source.md` + `memory/*.md` + `ux-kb-curated/*` + `ctx_search` 就直接开问设计师背景问题 (rule 23)
 - ★ v0.4 — Phase 1 把 KB / memory 里已经有答案的问题重新抛给设计师（应该改成"找到这些，对吗？"） (rule 23)
+- ★ v0.4.2 — chat 对话里嵌入 `[ref: ...]` 引用标记（cite-or-die 只对 `ux-onepage.md` 文件强制，chat 里是噪音） (rule 22.1.1)
+- ★ v0.4.2 — chat 表格里出现 "Cite" / "Lens" 列展示给设计师 (rule 22.1.1)
+- ★ v0.4.2 — 把 memory entry / decision 的 YAML frontmatter（date: / decision: / reason: / impact: / supersedes:）当 bullet list 念给设计师听 (rule 22.1 机器口吻类 + 22.5 静默执行)
+- ★ v0.4.2 — chat 里用 "透镜" / "棱镜" 这种 "lens" 的中文化译法 (rule 22.1)
+- ★ v0.4.2 — chat 里报数 "KEEP 9 / CUT 1" 或写 "JTBD-N (← Sn)" 映射记账 (rule 22.1)
+- ★ v0.4.2 — chat 里出现 "Step N" / "Asked Phase N gate" 这类内部 step / 流程标签 (rule 22.1)
