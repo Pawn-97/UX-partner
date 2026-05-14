@@ -264,10 +264,10 @@ Read `**/.claude-plugin/templates/ux-onepage.html.template`. 已大幅精简的 
 | `{{PRIMARY_USER}}` / `{{SECONDARY_USERS}}` | §4 短标签 |
 | `{{BASELINE_BULLETS_HTML}}` | each active `memory/baseline.md` entry → `<li>content</li>`（**不带 sup ref**，纯文本） |
 | `{{SCENARIO_ROWS_HTML}}` | §14 rows; KEEP → `td.decision-keep`, CUT → `td.decision-cut`; lens label in `<span class="lens-tag">`（标签短到 4 字以内：时机 / 跨场景 / 用户 / 边界 / 出错）。★ v0.4.3 — iteration 项目额外一列 `<span class="change-tag change-new\|change-mod\|change-existing">★新增/改造/复用</span>` |
-| `{{IA_TREE_HTML}}` (iteration / refactor) | 节点前缀 `★NEW` 用 `<span class="ia-new">★NEW</span>`，`(改造)` 用 `<span class="ia-mod">改造</span>`，`(已有)` 用 `<span class="ia-existing">已有</span>`。`<style>` 段内三类 CSS：`.ia-new{color:#d97706;font-weight:600}`、`.ia-mod{color:#b45309}`、`.ia-existing{color:#999}` |
+| `{{IA_TREE_HTML}}` (iteration / refactor) | 节点前缀 `★NEW` 用 `<span class="ia-new">★NEW</span>`，`(改造)` 用 `<span class="ia-mod">改造</span>`，`(已有)` 用 `<span class="ia-existing">已有</span>`。★ v0.5 — CSS 已内置在模板（IKB Swiss：新增=IKB 蓝、改造=黑加粗、已有=灰）；不要在 `<style>` 里另写。 |
 | `{{MERMAID_FLOW_SRC}}` (iteration / refactor) | 原样保留 `classDef new / modified / existing` 定义 + 节点的 `:::class` 标注。Mermaid 会自动渲染三色——HTML 端不要剥离这些标记 |
 | `{{NOT_DOING_BULLETS_HTML}}` | §15 list → `<li><b>S<n>: name</b> — reason</li>`（无 ref） |
-| `{{JTBD_CARDS_HTML}}` | §6 cards. Primary → `<div class="jtbd-card">`; Anti → `<div class="jtbd-card anti">`. 卡片 body: `<div class="id">需求 N · 核心</div><div class="text">短句, b 标签包关键动作</div><span class="priority">S1 · S3</span>`（priority chip 只放对应场景 ID，不写"对应场景："前缀） |
+| `{{JTBD_CARDS_HTML}}` | §6 cards. ★ v0.5 — Primary → `<div class="jtbd-card primary">`（IKB 高亮 priority chip）；Secondary → `<div class="jtbd-card">`（中性）；Anti → `<div class="jtbd-card anti">`（灰底）。卡片 body: `<div class="id">需求 N · 核心</div><div class="text">短句, b 标签包关键动作</div><span class="priority">S1 · S3</span>`（priority chip 只放对应场景 ID，不写"对应场景："前缀） |
 | `{{IA_TREE_HTML}}` | §16 嵌套 `<ul><li>name <span class="purpose">— purpose</span></li></ul>`。purpose 文字短，≤ 20 字 |
 | `{{IA_COVERAGE_HTML}}` | `<li>需求 N → 路径</li>` 系列（短） |
 | `{{MERMAID_FLOW_SRC}}` | §17 raw mermaid source (preserve indentation; do NOT escape HTML chars inside — Mermaid handles its own parsing). 节点名要短 |

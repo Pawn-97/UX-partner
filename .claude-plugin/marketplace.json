@@ -7,8 +7,8 @@
     {
       "name": "ux-project",
       "source": "./.claude-plugin",
-      "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage (md + HTML 一图流) via a 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). v0.4.x adds: phase gates, scenario lenses, JTBD rubric, online-behavior baseline memory, IA + interaction flow output (B&W), 说人话规范 covering all designer-facing text, KB-first background gathering (rule 23), and /ux-project:update for one-command plugin upgrades. Preserves v0.3 cite-or-die, context-memory, stale detection, and AskUserQuestion UI.",
-      "version": "0.4.4",
+      "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage (md + HTML 一图流) via a 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). v0.5.0 重做 HTML 模板视觉系统为瑞士国际主义 · IKB 克莱因蓝单页（vendored from op7418/guizang-ppt-skill, MIT）。Preserves v0.4 phase gates, scenario lenses, JTBD rubric, baseline memory, IA + flow, 说人话规范, KB-first background gathering, /ux-project:update, cite-or-die, context-memory, stale detection.",
+      "version": "0.5.0",
       "author": {
         "name": "GuanchengDing"
       }

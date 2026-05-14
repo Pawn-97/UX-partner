@@ -1,7 +1,7 @@
 {
   "name": "ux-project",
-  "version": "0.4.4",
-  "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage (md + HTML 一图流) through a 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). v0.4 adds: strong phase gates with designer confirmation, scenario expansion lenses, JTBD evaluation rubric, online-behavior baseline memory, IA structure + interaction flow output (B&W, no UI details), and a self-contained HTML 一图流 deliverable. Preserves v0.3 cite-or-die, context-memory, stale detection, and AskUserQuestion UI. Does NOT generate hi-fi UI, visual styling, or Figma artifacts — those remain downstream.",
+  "version": "0.5.0",
+  "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage (md + HTML 一图流) through a 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). v0.5 重做 HTML 模板视觉系统为瑞士国际主义 · IKB 克莱因蓝单页（视觉语言 vendored from op7418/guizang-ppt-skill, MIT）。Preserves v0.4 三阶段 gate、场景扩展 lens、JTBD rubric、baseline memory、IA + 交互流程、cite-or-die、stale detection、AskUserQuestion UI。Does NOT generate hi-fi UI, Figma artifacts — those remain downstream.",
   "author": {
     "name": "GuanchengDing"
   },
@@ -21,6 +21,9 @@
     "designer",
     "memory",
     "context-memory",
-    "html-onepager"
+    "html-onepager",
+    "swiss-style",
+    "ikb",
+    "klein-blue"
   ]
 }
