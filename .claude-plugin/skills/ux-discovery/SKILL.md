@@ -768,7 +768,7 @@ When triggered by description match (no slash command), guide the designer towar
 
 These are v0.4 defaults. Change them by editing this SKILL.md or via discussion with designer.
 
-- **PRD format**: markdown only.
+- **PRD format** ★ v0.4.4: `.md` 或 `.docx`。DOCX 由 `/ux-project:start` 自动调用 pandoc 转换（需要 `brew install pandoc`），内嵌图片抽取到 `projects/<name>/pm-source-assets/`，原文里图变成相对路径引用。其它格式（.pdf / .pptx 等）仍需手工转一次再来。
 - **`source_quality` enum**: `PRODUCT-DOC` | `TEMPLATE` | `PLAYBOOK` | `META` | `OUTDATED`
 - **`confidence` enum**: `high` | `medium` | `low`
 - **`status` enum** ★ v0.2: `active` | `archived` | `superseded-by:<id>`

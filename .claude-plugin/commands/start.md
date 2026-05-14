@@ -1,7 +1,7 @@
 ---
-description: Initialize a UX discovery project from a PRD path. Creates projects/<name>/ workspace, copies PRD with version frontmatter, runs initial KB analysis, outputs a < 200-char structured task summary, and waits for designer confirm before writing state.md.
+description: Initialize a UX discovery project from a PRD path (.md or .docx). Creates projects/<name>/ workspace, converts DOCX via pandoc if needed (preserves embedded images to pm-source-assets/), copies PRD with version frontmatter, runs initial KB analysis, outputs a < 200-char structured task summary, and waits for designer confirm before writing state.md.
 argument-hint: <project-name> <prd-file-path>
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
 
 You are running the `/ux-project:start` command. Activate the `ux-discovery` skill's principles (find SKILL.md via Glob `**/.claude-plugin/skills/ux-discovery/SKILL.md` if not already active).
@@ -10,7 +10,7 @@ You are running the `/ux-project:start` command. Activate the `ux-discovery` ski
 
 `$ARGUMENTS`
 
-Parse into: `<project-name>` (single token, kebab-case) and `<prd-file-path>` (absolute or relative path to a markdown PRD).
+Parse into: `<project-name>` (single token, kebab-case) and `<prd-file-path>` (absolute or relative path to `.md` or `.docx`).
 
 If arguments are missing or malformed, ask the designer to provide them in this exact form: `/ux-project:start <name> <path>`.
 
@@ -18,8 +18,55 @@ If arguments are missing or malformed, ask the designer to provide them in this 
 
 ### 1. Validate inputs
 
-- Check the PRD path exists and is `.md`. If not markdown, **stop** and tell the designer to convert first (Phase 0 default: markdown only).
+- Check the PRD path exists.
+- Check the extension is `.md` or `.docx` (case-insensitive). Other formats → **stop** and tell the designer: "目前只支持 .md 和 .docx。.pdf / .pptx 等转成 docx 或 md 后再来。"
 - Check `projects/<project-name>/` does NOT already exist. If it does, ask: "项目 `<name>` 已存在。要 `/ux-project:resume <name>` 接着用，还是用别的名字开新项目？"
+
+### 1b. ★ v0.4.4 — DOCX → MD conversion（仅当 input 是 .docx）
+
+If the input file ends with `.docx`:
+
+1. **Check pandoc availability**:
+   ```bash
+   which pandoc
+   ```
+   If exit non-zero, surface plainly (rule 22):
+   > "你给的是 .docx，需要 pandoc 帮我转成 markdown。装一下：`brew install pandoc`（macOS）/ `apt install pandoc`（Linux）/ `choco install pandoc`（Windows），然后重跑 /ux-project:start。"
+
+   Then **stop**.
+
+2. **Make assets directory first**（pandoc 需要先有目录）:
+   ```bash
+   mkdir -p projects/<project-name>/pm-source-assets
+   ```
+
+3. **Convert via pandoc**：抽 images 到 side 目录，输出 MD 到临时文件:
+   ```bash
+   pandoc "<prd-file-path>" \
+     -f docx \
+     -t gfm \
+     --wrap=none \
+     --extract-media="projects/<project-name>/pm-source-assets" \
+     -o "projects/<project-name>/.pm-source.body.md"
+   ```
+
+   说明:
+   - `-t gfm`: GitHub-flavored Markdown — 表格 / task list / fenced code 都对
+   - `--wrap=none`: 不强制换行，长段落保持单行（设计师后续 grep / cite 用 L<line> 更稳）
+   - `--extract-media`: 抽 DOCX 内嵌图片到 pm-source-assets/，原文里的图变成 `![](pm-source-assets/media/imageN.png)` 形式的相对引用
+   - 输出到 `.pm-source.body.md`（dot-prefixed 临时文件，下一步合成最终 pm-source.md 后删）
+
+4. **Read 输出并报基本结果**（对设计师说，rule 22）:
+   > "DOCX 转好了，提取到 N 张图片放在 pm-source-assets/ 下。开始读内容..."
+
+   不报 pandoc 命令行 / stderr / GFM dialect 这些细节。
+
+5. **Edge cases**:
+   - 退出码非零 → 显示 stderr 的最后 5 行 + "转换失败，常见原因：docx 文件损坏 / pandoc 版本太老。要不要换 .md 重来？"，停下
+   - 空输出（pandoc 跑通但 `.pm-source.body.md` 是空的）→ "docx 转出来是空的，可能是图片密集型文档。先检查 .docx 在 Word 里能否打开"
+   - 极大 docx（> 5MB MD 输出）→ 警告但继续："文档比较长，后续 ctx_search 可能慢一点"
+
+If input is already `.md`, skip this step entirely.
 
 ### 2. Locate plugin templates and curated KB
 
@@ -31,15 +78,29 @@ Read all three curated KB files now — they're your anchor knowledge for this s
 
 ### 3. Create workspace + PRD copy
 
+If step 1b ran (DOCX path), the project directory already exists. Otherwise:
+
 ```
 mkdir -p projects/<project-name>/
 ```
 
-Read the source PRD. Then write `projects/<project-name>/pm-source.md`:
+**Read the source content**:
+- MD input → read the source `.md` file directly
+- DOCX input → read `projects/<project-name>/.pm-source.body.md`（step 1b 的产出）
+
+Then write `projects/<project-name>/pm-source.md`:
 
 - Use `pm-source.template.md` as the frontmatter shape.
 - Set `project: <project-name>`, `prd_version: v1`, `valid_from: <today YYYY-MM-DD>`, `valid_to: null`, `superseded_by: null`.
-- Append the source PRD body verbatim under the frontmatter.
+- ★ v0.4.4 — DOCX 路径多加一个 frontmatter 字段：`source_format: docx`，`source_file: <原始 docx 路径>`，`assets_dir: ./pm-source-assets`。MD 路径不加这几个字段（保持兼容）。
+- Append the body content (from MD source OR from step 1b's converted body) verbatim under the frontmatter.
+
+**Cleanup**: 如果走了 DOCX 路径，删掉临时文件 `.pm-source.body.md`：
+```
+rm projects/<project-name>/.pm-source.body.md
+```
+
+**Verification**: 走 DOCX 路径时，验证至少能 grep 出原文部分关键词（避免 pandoc 静默吐空内容）。如果 grep 完全无匹配 → 警告"转换好像出了问题，pm-source.md 内容看起来跟原文不沾边"，问要不要继续。
 
 ### 4. Initialize state.md (skeleton only)
 
@@ -144,6 +205,10 @@ Plausible options come from your PRD analysis + KB context — they're hypothesi
 ## Failure modes
 
 - PRD path doesn't exist → stop, ask for correction.
+- PRD extension is not `.md` / `.docx` → stop, ask designer to convert first.
+- ★ v0.4.4 — DOCX 输入但 pandoc 未装 → 给装机命令，停下。
+- ★ v0.4.4 — pandoc 转换失败（退出码非零） → 显示 stderr 末尾，建议换 .md 重来。
+- ★ v0.4.4 — pandoc 转出来内容为空 → 报警 + 建议检查源 docx。
 - PRD is empty or 1 line → stop, suggest the designer paste actual PRD content.
 - `projects/` directory can't be created → check working directory, surface path issue.
 - `ctx_search` returns nothing useful → continue without KB facts; flag in chat as "KB 未命中相关条目，本次分析仅靠 PRD 内容"。
