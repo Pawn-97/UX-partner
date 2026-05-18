@@ -35,6 +35,19 @@ const path = require('path');
 // First match wins. Files that match no rule are tagged UNCATEGORIZED.
 // ──────────────────────────────────────────────────────────────────────────────
 const QUALITY_RULES = [
+  // ── zoomkb-builder wiki/ output ── first match wins ────────────────
+  { pattern: /\/wiki\/index\.md$/, quality: 'META' },
+  { pattern: /\/wiki\/concepts\//, quality: 'CONCEPT' },
+  { pattern: /\/wiki\/task-flows\//, quality: 'TASK-FLOW' },
+  { pattern: /\/wiki\/user-roles\//, quality: 'USER-ROLE' },
+  { pattern: /\/wiki\/constraints\//, quality: 'CONSTRAINT' },
+  { pattern: /\/wiki\/ux-patterns\//, quality: 'UX-PATTERN' },
+  // ── zoomkb-builder raw/ source articles ────────────────────────────
+  { pattern: /\/raw\//, quality: 'RAW-SOURCE' },
+  // ── zoomkb builder report files ────────────────────────────────────
+  { pattern: /\/(crawl|ingest|lint|validate|build)-report\.md$/, quality: 'META' },
+  { pattern: /\/log\.md$/, quality: 'META' },
+  // ── Phone-KnowledgeBase legacy rules ───────────────────────────────
   { pattern: /\/20-Zoom-Phone-Features\//, quality: 'PRODUCT-DOC' },
   { pattern: /\/40-Templates\//, quality: 'TEMPLATE' },
   { pattern: /\/30-Agent-Playbooks\//, quality: 'PLAYBOOK' },
@@ -54,6 +67,7 @@ const SKIP_DIR_NAMES = new Set([
   '.trash',
   'dist',
   'build',
+  'extraction-queue',
 ]);
 
 // File patterns to skip (won't be indexed).
@@ -185,6 +199,12 @@ function main() {
   reportLines.push('');
   reportLines.push('## What each tag means');
   reportLines.push('');
+  reportLines.push('- **CONCEPT** — product concepts/features, high confidence, cite as fact');
+  reportLines.push('- **TASK-FLOW** — user task steps and dependencies, cite for workflow');
+  reportLines.push('- **USER-ROLE** — role/permission definitions, cite for access constraints');
+  reportLines.push('- **CONSTRAINT** — design constraints and limitations, cite for feasibility');
+  reportLines.push('- **UX-PATTERN** — reusable interaction patterns, cite as design precedent');
+  reportLines.push('- **RAW-SOURCE** — original support article, ground truth (cite for authority)');
   reportLines.push('- **PRODUCT-DOC** — high confidence, treat as fact (still cite)');
   reportLines.push('- **TEMPLATE** — structural reference, not factual');
   reportLines.push('- **PLAYBOOK** — process knowledge, not factual');

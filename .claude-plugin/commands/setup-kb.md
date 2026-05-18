@@ -16,13 +16,33 @@ If missing, ask the designer for the KB path. Don't guess.
 
 ## Steps
 
-### 1. Validate the path
+### 1. Detect KB type and validate
+
+Check for zoomkb-builder wiki/ structure:
 
 ```bash
-test -d "<kb-path>" && echo "exists" || echo "missing"
+test -d "<kb-path>/wiki" && test -f "<kb-path>/wiki/index.md" && echo "zoomkb-wiki" || echo "generic"
 ```
 
-If missing → stop, ask for correction.
+If `zoomkb-wiki`: confirm the structure looks right:
+
+```bash
+ls -d <kb-path>/wiki/concepts/ <kb-path>/wiki/task-flows/ <kb-path>/wiki/user-roles/ <kb-path>/wiki/constraints/ <kb-path>/wiki/ux-patterns/ 2>&1
+```
+
+Then tell the designer:
+
+```
+检测到 zoomkb-builder wiki 结构:
+  concepts/ task-flows/ user-roles/ constraints/ ux-patterns/
+
+分类 tag:
+  CONCEPT TASK-FLOW USER-ROLE CONSTRAINT UX-PATTERN RAW-SOURCE META
+```
+
+If generic KB (no wiki/index.md), proceed as normal.
+
+If path missing → stop, ask for correction.
 
 ### 2. Run the classification script
 

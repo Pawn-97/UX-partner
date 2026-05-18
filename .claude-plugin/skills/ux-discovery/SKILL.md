@@ -49,7 +49,7 @@ Hi-fi UI generation, visual styling, and Figma artifacts are handled by `huashu-
 
 11. **★ v0.2 — Continuous context absorption.** During discussion, propose memory entries from the conversation (auto-propose, default batched every 5 rounds). The `/ux-project:add-context` command is the explicit manual entry. After `ux-onepage.md` exists, any new context marks it `stale: true`.
 
-12. **★ v0.2 — Citation priority.** Cite order: PRD > KB > project memory (memory/*) > assumptions. Citations to memory entries MUST have `status: active`. archived/superseded entries block cite-check.
+12. **★ v0.2 — Citation priority.** Cite order: PRD > KB wiki (concepts/task-flows/constraints/user-roles/ux-patterns) > KB raw (support articles) > project memory (memory/*) > assumptions. Citations to memory entries MUST have `status: active`. archived/superseded entries block cite-check.
 
 13. **★ v0.2 — Stale ≠ invalid.** Marking an onepage `stale` does NOT invalidate its content; it signals "new context not yet absorbed." Designer decides when to regen.
 
@@ -562,11 +562,53 @@ KB is indexed in **context-mode** (FTS5 + source-quality tag prefixes). Use `ctx
 **Result handling**: top 5 chunks per query. Never bulk-load.
 
 **Source quality tags**:
-- `[PRODUCT-DOC]` → high confidence, treat as fact (still cite)
-- `[TEMPLATE]` → structural reference, not factual
-- `[PLAYBOOK]` → process knowledge, not factual
-- `[META]` → maintenance/index info, low value
-- `[OUTDATED]` → do NOT cite without designer approval
+
+| Tag | Meaning | Cite rule |
+|---|---|---|
+| `[CONCEPT]` | zoomkb wiki concept/feature page | cite as design fact |
+| `[TASK-FLOW]` | zoomkb wiki task workflow | cite for user steps |
+| `[USER-ROLE]` | zoomkb wiki role/permission def | cite for access constraints |
+| `[CONSTRAINT]` | zoomkb wiki design constraint | cite for feasibility check |
+| `[UX-PATTERN]` | zoomkb wiki reusable pattern | cite as design precedent |
+| `[RAW-SOURCE]` | original support article (ground truth) | cite for authority |
+| `[PRODUCT-DOC]` | legacy KB product doc | high confidence, still cite |
+| `[TEMPLATE]` | structural reference, not factual | do not cite |
+| `[PLAYBOOK]` | process knowledge, not factual | weak cite only |
+| `[META]` | maintenance/index info, low value | do not cite |
+| `[OUTDATED]` | stale content | do NOT cite without designer approval |
+
+### Query routing (zoomkb wiki + raw)
+
+KB has two layers. Route queries by intent:
+
+| Intent | Search layer | Source filter |
+|---|---|---|
+| Product concept / feature definition | wiki first | `source: CONCEPT` |
+| User task steps / workflow | wiki first | `source: TASK-FLOW` |
+| Role permissions / access scopes | wiki first | `source: USER-ROLE` |
+| Design constraint / limitation | wiki first | `source: CONSTRAINT` |
+| Interaction pattern / precedent | wiki first | `source: UX-PATTERN` |
+| Ground truth / authoritative detail | raw fallback | `source: RAW-SOURCE` |
+| Did wiki miss or oversimplify? | raw fallback | `source: RAW-SOURCE` |
+| Cross-cutting (don't know layer) | both, wiki first | no filter, but prefer wiki results |
+
+**Rule**: wiki pages are LLM-compiled from raw articles. They are the primary reasoning surface. Raw articles are ground truth for verification — consult them when wiki claims look incomplete, contradictory, or need exact wording. Never reason directly from raw articles unless wiki is missing or suspect.
+
+### Citing wiki entities
+
+When citing a zoomkb wiki page in `ux-onepage.md`:
+
+```
+[ref: wiki/concepts/auto-receptionist.md]
+```
+
+The wiki page frontmatter contains its source articles. If you need to cite the original source:
+
+```
+[ref: raw/KB0061421.md]  ← via wiki/concepts/auto-receptionist.md
+```
+
+Always prefer citing the wiki page. Only cite raw directly when the wiki page doesn't cover the specific claim.
 
 ## Memory write rules (the gate)
 
@@ -769,7 +811,7 @@ When triggered by description match (no slash command), guide the designer towar
 These are v0.4 defaults. Change them by editing this SKILL.md or via discussion with designer.
 
 - **PRD format** ★ v0.4.4: `.md` 或 `.docx`。DOCX 由 `/ux-project:start` 自动调用 pandoc 转换（需要 `brew install pandoc`），内嵌图片抽取到 `projects/<name>/pm-source-assets/`，原文里图变成相对路径引用。其它格式（.pdf / .pptx 等）仍需手工转一次再来。
-- **`source_quality` enum**: `PRODUCT-DOC` | `TEMPLATE` | `PLAYBOOK` | `META` | `OUTDATED`
+- **`source_quality` enum**: `CONCEPT` | `TASK-FLOW` | `USER-ROLE` | `CONSTRAINT` | `UX-PATTERN` | `RAW-SOURCE` | `PRODUCT-DOC` | `TEMPLATE` | `PLAYBOOK` | `META` | `OUTDATED`
 - **`confidence` enum**: `high` | `medium` | `low`
 - **`status` enum** ★ v0.2: `active` | `archived` | `superseded-by:<id>`
 - **`phase` enum** ★ v0.4: `intake` | `phase_1_expand` | `phase_2_converge` | `phase_3_ship` | `ready_for_onepage` | `onepage-generated` | `handoff-ready`
