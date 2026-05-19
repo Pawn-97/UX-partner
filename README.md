@@ -220,10 +220,6 @@ Override by editing `.claude-plugin/skills/ux-discovery/SKILL.md`.
 
 ## Documents
 
-- [`ux-discovery-skill-v0.1-onepager.md`](ux-discovery-skill-v0.1-onepager.md) — design rationale, MVP scope, assumptions to validate
-- [`ux-discovery-skill-v0.2-onepager.md`](ux-discovery-skill-v0.2-onepager.md) — v0.2 onepager
-- [`ux-discovery-skill-v0.4-onepager.md`](ux-discovery-skill-v0.4-onepager.md) — v0.4 refine onepager (3-phase + HTML)
-- [`ux_discovery_partner_skill_创建文档.md`](ux_discovery_partner_skill_创建文档.md) — original creation proposal (Chinese, historical context)
 - [`.claude-plugin/README.md`](.claude-plugin/README.md) — plugin internals
 
 ## License

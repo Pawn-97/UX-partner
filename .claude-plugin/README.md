@@ -138,8 +138,3 @@ node "/Users/GuanchengDing/Claude Code-works/AI-projects/Design-partner/.claude-
 ```
 
 Then seed `ux-kb-curated/glossary.md` and `ux-kb-curated/design-principles.md` with the project's anchor terms and principles (ask the skill to draft a candidate from your KB).
-
-## Source of Truth
-
-- v0.1 design rationale: [`../ux-discovery-skill-v0.1-onepager.md`](../ux-discovery-skill-v0.1-onepager.md)
-- ★ v0.2 design rationale: [`../ux-discovery-skill-v0.2-onepager.md`](../ux-discovery-skill-v0.2-onepager.md) — context-memory + `/add-context` + stale onepage + state.md size cap + read-triggered propose
