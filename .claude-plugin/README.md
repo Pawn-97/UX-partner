@@ -46,11 +46,12 @@ After install, run `/reload-plugins` (or restart `claude`). The skill auto-trigg
 | Command | Purpose |
 |---|---|
 | `/ux-project:setup-kb <kb-path>` | One-shot KB setup: classify + index every markdown file into context-mode (idempotent) |
-| `/ux-project:start <project-name> <prd-path>` | Initialize project workspace, copy PRD, run KB analysis |
+| `/ux-project:start <project-name> <prd-path>` | Initialize project workspace, copy PRD, run KB analysis, **★ v0.6 — stub empty ux-onepage.md** |
 | `/ux-project:resume <project-name>` | Restore project context from `state.md` (gateway file) |
-| `/ux-project:add-context <project-name> <text-or-path>` | ★ v0.2 — Append context, classify, propose memory writes, mark onepage stale |
-| `/ux-project:onepage` | Generate `ux-onepage.md` (cite-check + memory status check + outdated-check + diff on regen; designer must approve) |
-| `/ux-project:handoff` | Generate `design-brief.md` for downstream design skills |
+| `/ux-project:refine [<project-name>]` | ★ v0.6 — Run the 3-phase gated workflow on the Living Onepage. Phase 1 writes PRD 一句话总结 + 3 JTBD scenarios; Phase 2 writes constraints/decisions/not-doing; Phase 3 writes IA/flow/handoff. Phase 3 confirm gate runs cite-check + draft→ref promote inline (rule 25) |
+| `/ux-project:add-context <project-name> <text-or-path>` | ★ v0.2 / v0.6 — Append context, classify, propose memory writes, mark per-phase stale flags (`stale_phase_N`) on state.md |
+| `/ux-project:export-html [<project-name>]` | ★ v0.6 (renamed from `/ux-project:onepage`) — Render finalized ux-onepage.md to HTML 一图流. Pre-condition: `phase_3_confirmed_at != null` |
+| `/ux-project:handoff` | Generate `design-brief.md` for downstream design skills (requires phase 3 confirmed) |
 
 ## How It's Triggered
 
@@ -93,11 +94,13 @@ Design-partner/                ← workspace root (A); cd here, run all commands
     skills/ux-discovery/SKILL.md
     commands/
       setup-kb.md              → /ux-project:setup-kb
-      start.md                 → /ux-project:start
+      start.md                 → /ux-project:start (★ v0.6 — stubs ux-onepage.md)
       resume.md                → /ux-project:resume
-      add-context.md           → /ux-project:add-context  (★ v0.2)
-      onepage.md               → /ux-project:onepage
+      refine.md                → /ux-project:refine  (★ v0.4 / v0.6 — 3-phase gated, Living Onepage)
+      add-context.md           → /ux-project:add-context  (★ v0.2 / v0.6 stale_phase_N)
+      export-html.md           → /ux-project:export-html  (★ v0.6 — renamed from /ux-project:onepage; .md→.html only)
       handoff.md               → /ux-project:handoff
+      update.md                → /ux-project:update
     templates/                 (13 templates: pm-source/state/decisions/assumptions/questions/ux-onepage/design-brief
                                + ★ v0.2: memory-stakeholders/memory-constraints/memory-terminology/memory-history/memory-preferences/background)
     scripts/

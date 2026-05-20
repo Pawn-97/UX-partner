@@ -113,6 +113,25 @@ Write `projects/<project-name>/state.md` from `state.template.md`:
 - Leave `Current Understanding` empty for now (will fill in step 8 after designer confirms the summary).
 - Leave `Memory Index` empty (no memory entries yet).
 
+### 4b. ★ v0.6 — Initialize ux-onepage.md stub (Living Onepage)
+
+Locate template via Glob: `**/.claude-plugin/templates/ux-onepage.template.md`.
+
+Read it, then Write `projects/<project-name>/ux-onepage.md` with these frontmatter substitutions:
+- `project: <project-name>`
+- `generated: <today YYYY-MM-DD>`
+- `prd_source: ./pm-source.md`
+- `prd_version: v1`
+- `last_regen: <today>`
+- `regen_count: 0`
+- `phase_1_confirmed_at: null`
+- `phase_2_confirmed_at: null`
+- `phase_3_confirmed_at: null`
+- `html_companion: ./ux-onepage.html`
+- `change_type: unknown` (confirmed during Phase 1 of `/ux-project:refine` per rule 24)
+
+**Leave all body `<placeholder>` text as-is.** The body has 3 H2 phase groups (`## Phase 1: 用户与问题`, `## Phase 2: 取舍与约束`, `## Phase 3: 结构与流程`); each phase fills its group when designer runs `/ux-project:refine` (rule 25). DO NOT fill any body section here — this is a stub, not a draft.
+
 ### 5. Run initial KB analysis (ctx_search)
 
 Extract 3–5 top keywords from the PRD title + first headings. Run `ctx_search` queries against the indexed KB. Capture only the top 5 chunks per query — never bulk-load files.
@@ -132,12 +151,9 @@ Output this structure to the designer **exactly**:
 - **可能的 solution bias**：<one line — what assumption did PRD jump to; what alternative framings exist>
 - **关键模糊点**：<one line — biggest unclear thing>
 
-## Relevant KB context (top 5 chunks, optional reading)
-
-- <chunk title> [ref: <kb-path>] (confidence: <h/m/l>)
-- ...
-
 ```
+
+★ v0.6 — The `## Relevant KB context` subsection that previously appeared here has been **removed** per rule 25. The KB sweep from step 5 still runs internally; its results stay implicit in the 5-bullet summary above. Do NOT echo "found in zoomkb wiki..." / "related KB context..." / similar — designer doesn't care about the retrieval process.
 
 **Strictly enforce the < 200-char cap on the 5 bullet lines combined.** If you cannot fit, drop "可能的 solution bias" first (it's the easiest to discuss in round 1 instead).
 
@@ -182,8 +198,9 @@ Print plain-text closing message:
 文件位置：`projects/<project-name>/`
 - pm-source.md (PRD v1, valid_from <today>)
 - state.md (phase: intake, auto_propose: true/batched)
+- ux-onepage.md ★ v0.6 (空 stub，3 个 phase 分组，会随 `/ux-project:refine` 逐步填充)
 
-下一步：先回答下面 3–5 个 round-1 问题；或 `/ux-project:resume <project-name>` 查看状态；或 `/ux-project:add-context <text|path>` 补背景。
+下一步：先回答下面 3–5 个 round-1 问题；或 `/ux-project:refine <project-name>` 进入三阶段打磨流程；或 `/ux-project:resume <project-name>` 查看状态；或 `/ux-project:add-context <text|path>` 补背景。
 ```
 
 **★ v0.3 — Then immediately fire the 3–5 round-1 questions, ONE `AskUserQuestion` per question.** Each call:

@@ -14,17 +14,20 @@ You are running the `/ux-project:handoff` command. Activate the `ux-discovery` s
 
 ### 1. Identify the project
 
-Same as `/ux-project:onepage`. If multiple projects could match, list and ask.
+If `<project-name>` provided, verify `projects/<project-name>/` exists. If multiple projects could match (omitted arg or ambiguous reference), list them via `AskUserQuestion` and let designer pick.
 
-### 2. Verify ux-onepage.md exists
+### 2. ★ v0.6 — Verify phase 3 is confirmed (rule 25)
 
-Check `projects/<project-name>/ux-onepage.md`. If missing:
+Read `projects/<project-name>/state.md` frontmatter:
+- `phase_3_confirmed_at` MUST be set (not `null`) — phase 3 confirm gate must have passed (cite-check + draft→ref promote complete)
 
+If `phase_3_confirmed_at` is null:
 ```
-ux-onepage.md 还没生成。先跑 /ux-project:onepage 再 /ux-project:handoff。
+Phase 3 还没收尾，handoff 需要建立在 confirmed onepage 上。先跑 /ux-project:refine <project-name> 走完 phase 3 确认 gate 再回来。
 ```
-
 …and stop.
+
+Also verify `projects/<project-name>/ux-onepage.md` body has NO remaining `[^d` or `[^a` markers (those should have been promoted at phase 3 confirm). If any found, instruct designer to re-run `/ux-project:refine` phase 3 confirm gate.
 
 ### 3. Read source material
 
@@ -77,7 +80,7 @@ First exploration prompt ready for: huashu-design / frontend-design / Figma
 
 ## Failure modes
 
-- ux-onepage.md missing → stop, suggest /ux-project:onepage first.
+- phase_3_confirmed_at == null → stop, suggest `/ux-project:refine <name>` to walk phase 3 confirm gate first. ★ v0.6 — ux-onepage.md always exists from `/ux-project:start` (stub), so the check moved to phase confirmation status.
 - ux-onepage.md has unresolved cite-check or outdated warnings (`⚠️` markers) → flag them; **★ v0.3 — confirm via `AskUserQuestion`** (SKILL.md § Question UI contract): `options: [✅ Continue / ❌ Stop / ✏️ Fix-first]`, `allow_other: true`. Don't silently propagate.
 - Template not found → fall back to inline structure (see template content); warn that the plugin install may be incomplete.
 

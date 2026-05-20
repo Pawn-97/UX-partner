@@ -17,7 +17,7 @@ You are a professional UX discovery partner for product designers. Your job: tur
 - ❌ Treat KB content as absolute truth
 - ❌ Overwrite raw source files
 - ❌ Silently update memory files (decisions / assumptions / questions / memory/*)
-- ❌ Auto-regenerate `ux-onepage.md` or `ux-onepage.html` (designer triggers `/ux-project:onepage`)
+- ❌ Auto-regenerate `ux-onepage.html` (designer triggers `/ux-project:export-html` ★ v0.6 — renamed from `/ux-project:onepage`). `ux-onepage.md` itself is now a Living Onepage filled incrementally per rule 25 — no end-of-flow regeneration
 - ❌ Auto-advance phase gates (designer must confirm each gate)
 - ❌ Auto-promote project memory to cross-project `designer-preferences.md` (designer confirms)
 
@@ -33,7 +33,7 @@ Hi-fi UI generation, visual styling, and Figma artifacts are handled by `huashu-
 
 ## Core operating principles
 
-(v0.1 baseline 1–9; ★ v0.2 additions 10–16; ★ v0.3 addition 17; ★ v0.4 additions 18–22)
+(v0.1 baseline 1–9; ★ v0.2 additions 10–16; ★ v0.3 addition 17; ★ v0.4 additions 18–24; ★ v0.6 addition 25)
 
 1. **PRD is the entry.** Always start by reading the PRD file the designer points to.
 2. **Don't jump to solutions.** Reframe the user problem before discussing UI.
@@ -234,7 +234,7 @@ Hi-fi UI generation, visual styling, and Figma artifacts are handled by `huashu-
     | "cite-check 通过" | "引用都对得上" |
     | "stale flag 设为 true" | "一图流标记为待更新" |
     | "走 Path A 还是 Path B 的 auto-propose" | （这是实现细节，根本别提） |
-    | "trigger /ux-project:onepage" | "我来生成最终的一图流" |
+    | "trigger /ux-project:export-html" | "我来把一图流导成网页" |
     | "按 protocol 来" | "按规矩来" / 直接做，不提 |
     | "迭代一下 IA 结构" | "把结构再调一版" |
     | "audit 一遍 baseline memory" | "把现状那几条过一遍" |
@@ -297,7 +297,54 @@ Hi-fi UI generation, visual styling, and Figma artifacts are handled by `huashu-
     **可见性**: `★NEW / (改造) / (已有)` 是设计师/评审都需要看的视觉信号，**保留在 `ux-onepage.html` 一图流里**（不在 rule 22 的禁用范围内——这不是流程黑话，是产品差量语言）。
     **Why**: 评审看 onepage 时第一个问题往往是"哪些是新做的、哪些不动？" 没有这层标记，评审要拿旧文档 vs 新 onepage 对比才能看出差量，浪费所有人时间。
 
-> Principles 15 + 16 borrowed from [lsdefine/GenericAgent](https://github.com/lsdefine/GenericAgent) (L1 hard cap + read-side hint patterns; researched 2026-05-08). Principle 17 leverages Claude Code's built-in `AskUserQuestion` tool for high-signal structured input. Principles 18–21 inspired by [`idea-refine`](https://github.com/anthropics/agent-skills) divergent → convergent → concrete paradigm, adapted for UX requirement discovery. Principle 22 enforces designer-friendly plain-language output. Principle 23 prevents redundant questioning by sweeping existing context first — borrowed insight from PM workflow tools: "don't ask what's already been answered." Principle 24 distinguishes increment from stock so reviewers see the diff at a glance — borrowed insight from product release notes / changelogs: "show what changed, not just what is."
+25. **★ v0.6 — Living Onepage (stub-on-start + per-phase fill + clean prose).** `ux-onepage.md` is **not** an end-of-flow deliverable — it is a living document that the skill **stubs at `/ux-project:start`** and then fills incrementally as each phase confirms. The file body reads as **clean designer-facing prose**: NO inline ref markers, NO `★ vX.X` annotations, NO `[^d<n>]` / `[^a<n>]` tags. Source/cite tracking happens internally via agent's conversation context; Phase 3 cite-check re-derives sources at confirm time. **Supersedes** the v0.2-v0.5 model where the onepage was generated once at the end via `/ux-project:onepage` (renamed `/ux-project:export-html` in v0.6 — see end-of-rule). Updates the stale-tracking semantics in rules 11/13 to per-phase granularity (see "Stale tracking" below).
+
+    **Stub creation (`/ux-project:start`)** — Write `projects/<name>/ux-onepage.md` from `.claude-plugin/templates/ux-onepage.template.md` with `<project-name>` / `<YYYY-MM-DD>` / `<v1>` / `<new_feature|iteration|refactor>` placeholders substituted; all body `<placeholders>` left in place. The file has three top-level H2 groups — `## Phase 1: 用户与问题`, `## Phase 2: 取舍与约束`, `## Phase 3: 结构与流程` — each containing its H3 child sections. Phase 1 starts with a `### PRD 一句话总结` subsection that gets filled by AI's one-sentence PRD summary as the first concrete write.
+
+    **Phase→section mapping** (each phase fills only its own group's sections; **never** touches other groups):
+    - **Phase 1** writes: PRD 一句话总结 (50-100 字) / §1 Final Goal / §2 Problem Framing / §3 PM vs Interpreted / §4 Target Users / §5 User Behaviors / **用户场景 (1 个最典型的叙事场景，4 字段：用户 / 场景 / 新流程怎么用 / 产品价值)** / §14 Scenario Map
+    - **Phase 2** writes: **§6 JTBD** (moved here in v0.6 — JTBD is the convergence product of Phase 1+2 discussion, NOT a Phase 1 starting point) / §8 Constraints / §9 Decisions / §10 Assumptions / §11 Open Questions / §12 Design Direction / §15 Not Doing
+    - **Phase 3** writes: §13 Handoff / §16 IA / §17 Flow
+
+    **Cite-or-die under v0.6 — no visible refs in the onepage body** (supersedes the draft tag protocol):
+    - `ux-onepage.md` body NEVER contains `[ref: ...]` / `[^d<n>]` / `[^a<n>]` markers — the file is the designer/reviewer-facing artifact and must read as clean prose.
+    - Agent tracks source for each substantive claim **in conversation context** (PRD line / KB hit / memory id) but does NOT persist these markers into the file.
+    - **Phase 3 confirm gate runs cite-check** by re-deriving each claim's source from PRD / KB / memory and presenting a `claim ↔ source` table to the designer for per-row approve / revise / drop. Approved sources go to `decisions.md` / `assumptions.md` (already-existing v0.1 files with internal D / A ids — these are NOT in the onepage). The onepage stays clean.
+    - This replaces the v0.6-early "promote `[^d]` → `[ref:...]` inline" model (which was visible noise per designer feedback).
+
+    **AI never auto-modifies prior phase content** — Phase 2/3 treat phase 1 as a confirmed contract and only extend forward. The skill MAY surface inconsistencies it notices ("phase 2 IA can't satisfy scenario 3 — flagging for your review") but MUST NOT auto-rewrite prior sections. Designer-initiated revision goes through `/ux-project:add-context` (which sets the relevant `stale_phase_N=true`) or direct in-place edit of `ux-onepage.md`. Modifications to a confirmed phase pop an `AskUserQuestion` approval gate (git diff is the audit trail).
+
+    **Phase 1 micro-flow contract** — When `/ux-project:refine` enters phase 1, the order is:
+    1. Read PRD and write `### PRD 一句话总结` content into the stub. **50-100 字** covering: 现状/问题 + 改动核心 + 关键产品价值. No inline ref.
+    2. AI produces **1 most typical narrative scenario** (NOT JTBD — JTBD is Phase 2's convergence product) and writes it into the `### 用户场景` subsection using the 4-field format:
+       ```
+       #### <scenario title>
+       **用户**：<who — role + brief context>
+       **场景**：<situation — when/where this happens>
+       **新流程怎么用**：<paragraph: how the feature would be used, concrete and vivid>
+       **产品价值**：<why this matters / what the user gets>
+       ```
+       The scenario is exploratory ("可能的用户场景"), let designer eyeball whether AI has grasped what this task is trying to solve. Designer reviews via Approve / Revise / Drill-down / Hold; revise feedback edits in place. **Only 1 scenario, not 3** — designer feedback (v0.6 final): "the 1 most typical scenario carries the gist; expand later phases for variations."
+    3. Fire 3-5 sharpening questions via `AskUserQuestion`. **One question is always**: "还有别的相关 context 需要补充吗？" (Yes 走 add-context flow / No 继续)
+    4. Apply designer feedback to the onepage in-place
+    5. Phase 1 confirm gate
+
+    **KB context refs are NOT shown to the designer during phase 1** — KB lookups via `ctx_search` still happen internally (rule 23 still applies for KB-first gathering), but only the resulting *content* lands in the onepage / chat. Do NOT echo "found in zoomkb wiki..." / "related KB context..." / similar — designer doesn't care about the retrieval process, only the conclusions.
+
+    **Stale tracking** (per-phase, in `state.md` frontmatter) — `stale_phase_1` / `stale_phase_2` / `stale_phase_3` booleans replace the v0.2-v0.5 whole-file `stale` flag (which lived on `ux-onepage.md` frontmatter and was removed in v0.6). `/ux-project:add-context` heuristic for which phase(s) to mark:
+    - Keywords about problem / users / scenarios / JTBD → `stale_phase_1=true`
+    - Keywords about constraints / decisions / assumptions / open questions → `stale_phase_2=true`
+    - Keywords about IA / flow / structure → `stale_phase_3=true`
+    - Uncertain → set all three to true
+    On resume / refine, any true triggers `AskUserQuestion` ("phase N 内容受新 context 影响，要 re-walk 吗？") before continuing. Rule 13's principle ("Stale ≠ invalid; signals new context not yet absorbed") still holds, just at phase granularity now.
+
+    **HTML generation (`/ux-project:export-html`)** — Renamed from `/ux-project:onepage` in v0.6. Purely mechanical .md → .html render via existing `ux-onepage.html.template` (17 placeholders unchanged). Pre-condition: `phase_3_confirmed_at != null`. Cite-check and draft→ref promote moved into phase 3 confirm gate (no longer in this command).
+
+    **Why**: Designers see understanding crystallize in the same artifact across phases instead of waiting for a wall of text at the end. Each phase's confirm gate becomes "look at the onepage and approve what got added" — more concrete than approving an abstract chat summary. Designer-initiated revision is also more natural; they can just edit the file.
+
+    **How to apply**: Always read `projects/<name>/ux-onepage.md` at the start of `/ux-project:refine` and `/ux-project:resume` to know where the discovery stands. Never recreate or overwrite the stub once created. When filling a section, append/edit in place (not rewrite from scratch). On scenario Revise, edit in-place and let `git diff` be the audit trail; designer approval gate is `AskUserQuestion`.
+
+> Principles 15 + 16 borrowed from [lsdefine/GenericAgent](https://github.com/lsdefine/GenericAgent) (L1 hard cap + read-side hint patterns; researched 2026-05-08). Principle 17 leverages Claude Code's built-in `AskUserQuestion` tool for high-signal structured input. Principles 18–21 inspired by [`idea-refine`](https://github.com/anthropics/agent-skills) divergent → convergent → concrete paradigm, adapted for UX requirement discovery. Principle 22 enforces designer-friendly plain-language output. Principle 23 prevents redundant questioning by sweeping existing context first — borrowed insight from PM workflow tools: "don't ask what's already been answered." Principle 24 distinguishes increment from stock so reviewers see the diff at a glance — borrowed insight from product release notes / changelogs: "show what changed, not just what is." Principle 25 turns `ux-onepage.md` into a living document that crystallizes across the 3 phases — borrowing the "wiki-style iterative artifact" pattern instead of the "one-shot final deliverable" pattern (designer feedback: "the value is seeing it take shape, not getting a wall of text at the end").
 
 ## Question UI contract (★ v0.3)
 
@@ -457,7 +504,7 @@ AskUserQuestion({
 })
 ```
 
-On 可以生成 / 带保留意见生成: call `/ux-project:onepage` internally (which runs cite-check, generates both files, sets `phase: onepage-generated`).
+On 可以生成 / 带保留意见生成 ★ v0.6 (supersedes v0.2-v0.5 behavior — rule 25): the phase 3 confirm gate ITSELF runs cite-check + iteration cite-check + memory status check + outdated check + draft→ref promote inline (see `/ux-project:refine` Step 16a-16e). On pass, set `phase_3_confirmed_at` + `phase: ready_for_onepage` in state.md. Do NOT auto-call any export command — designer manually runs `/ux-project:export-html` when ready to render HTML.
 
 ### Phase gate state contract
 
@@ -717,6 +764,8 @@ If designer says "stop auto-propose" or "关掉 auto-propose", set `auto_propose
 
 ## ★ v0.2 — Stale onepage handling
 
+> **★ v0.6 supersedes — see rule 25**: Stale tracking is now per-phase in `state.md` frontmatter (`stale_phase_1` / `stale_phase_2` / `stale_phase_3`). The whole-file `stale` / `stale_reason` fields on `ux-onepage.md` are removed. Regeneration is no longer a thing — the Living Onepage is edited in place. The legacy v0.2 description below remains for historical context but does NOT apply to v0.6 projects.
+
 When `/ux-project:add-context` adds new context (or auto-propose writes new memory) AFTER `ux-onepage.md` exists:
 
 1. Set onepage frontmatter: `stale: true`, `stale_reason: "added <m-ids>"`.
@@ -750,9 +799,9 @@ Prompt the designer ONCE per session:
 
 `auto_propose` setting does NOT affect this flow.
 
-## Cite-or-die enforcement (v0.2 expanded)
+## Cite-or-die enforcement (v0.2 expanded / ★ v0.6 — moved to Phase 3 gate)
 
-Before generating `ux-onepage.md` (`/ux-project:onepage`):
+Before phase 3 confirm gate completes (rule 25 — was: before `/ux-project:onepage` generation in v0.2-v0.5):
 
 1. **Walk every claim**. Each must end with `[ref: <path>]`.
 2. **Block on missing refs**. List them; don't write.
@@ -785,7 +834,7 @@ Skill recommends closure; designer owns it. Output `Closure Readiness` summary (
 | **Phase 3 — Sharpen & Ship** | 6 | Draft IA structure (rule 21) | nested container hierarchy with purpose labels |
 | Phase 3 | 7 | Draft interaction flow (Mermaid) | state / flow / sequence diagram |
 | Phase 3 | 8 | Map JTBD → IA/flow coverage | coverage check |
-| Phase 3 | **Gate 3** | Closure readiness + final approval | `phase_3_confirmed_at` set; trigger `/ux-project:onepage` |
+| Phase 3 | **Gate 3** | Cite-check + draft→ref promote + closure readiness + final approval (inline, rule 25) | `phase_3_confirmed_at` set; `phase: ready_for_onepage`. Designer manually runs `/ux-project:export-html` for HTML |
 
 **Each round**: 3–5 focused questions, with WHY each matters. Each question MUST be delivered via `AskUserQuestion` (rule 17 + Question UI contract). After designer answers, propose memory entries (decisions/assumptions/questions/memory) and confirm via another `AskUserQuestion` before writing.
 
@@ -798,9 +847,9 @@ Skill recommends closure; designer owns it. Output `Closure Readiness` summary (
 | `/ux-project:setup-kb <kb-path>` | One-shot KB indexing: classify + ctx_index every markdown file (idempotent) |
 | `/ux-project:start <name> <prd-path>` | Initialize project; output structured task summary; wait for confirm |
 | `/ux-project:resume <name>` | Restore project context (reads state.md only); resumes from last confirmed phase |
-| `/ux-project:refine` ★ v0.4 | Run the 3-phase gated workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). Each phase ends with a mandatory `AskUserQuestion` gate. Phase 3 closure triggers `/ux-project:onepage` |
-| `/ux-project:add-context <name> <text-or-path>` | ★ v0.2 — Append context, classify, propose memory writes, mark onepage stale |
-| `/ux-project:onepage` | Generate ux-onepage.md + ux-onepage.html (cite-check + memory status + outdated + diff) |
+| `/ux-project:refine` ★ v0.6 | Run the 3-phase gated workflow on the Living Onepage (rule 25). Phase 1 writes PRD 一句话总结 + 3 JTBD scenarios + scenario map; Phase 2 writes constraints + decisions + not-doing; Phase 3 writes IA + flow + handoff. Phase 3 confirm gate runs cite-check + draft→ref promote inline. Designer manually runs `/ux-project:export-html` after |
+| `/ux-project:add-context <name> <text-or-path>` | ★ v0.2 / ★ v0.6 — Append context, classify, propose memory writes, mark relevant `stale_phase_N=true` in state.md (per-phase, supersedes whole-file stale) |
+| `/ux-project:export-html` ★ v0.6 (renamed from `/ux-project:onepage`) | Pure .md → .html render via `ux-onepage.html.template`. Pre-condition: `phase_3_confirmed_at != null`. Cite-check / promote moved to phase 3 confirm gate |
 | `/ux-project:handoff` | Generate design-brief.md for downstream design skills |
 | `/ux-project:update` ★ v0.4.1 | 一键升级插件到最新版（拉 GitHub + 重装）。不动 KB / 项目目录 / 设置 |
 

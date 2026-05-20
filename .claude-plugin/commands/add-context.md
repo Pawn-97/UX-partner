@@ -1,5 +1,5 @@
 ---
-description: Append context to current project — classify input and propose memory writes (stakeholder / constraint / terminology / history / preference / decision / assumption). After confirm, write to memory/<file>.md and append raw to background.md. Marks ux-onepage.md as stale if it exists.
+description: ★ v0.6 — Append context to current project. Classify input and propose memory writes (stakeholder / constraint / terminology / history / preference / decision / assumption / baseline). After confirm, write to memory/<file>.md and append raw to background.md. Mark per-phase stale flags (stale_phase_N) on state.md based on which phase(s) the context affects (rule 25). Living Onepage is edited in place — no regeneration.
 argument-hint: <project-name> <text-or-file-path>
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
@@ -164,21 +164,45 @@ Read `projects/<project-name>/state.md`. Then:
 - If still > 30 after demotion: warn designer:
   > ⚠️ state.md still exceeds 30-line cap after demotion. Consider archiving old decisions/assumptions/questions.
 
-### 9. Mark onepage stale (if exists)
+### 9. ★ v0.6 — Mark affected phase(s) stale in state.md (rule 25)
 
-If `projects/<project-name>/ux-onepage.md` exists:
+> **v0.6 supersedes v0.2-v0.5**: whole-file `stale` / `stale_reason` fields on `ux-onepage.md` were REMOVED. Stale tracking moved to per-phase booleans on `state.md`. The Living Onepage is edited in place (no regeneration concept).
 
-a. Edit its frontmatter:
-   - `stale: true`
-   - `stale_reason: "added <list of new m-ids>"`
+Classify each confirmed memory entry by **which phase(s)** of the onepage it most likely affects, using this heuristic:
 
-b. Add or update banner at top of body (right after the `# UX Onepage: <name>` heading):
-   ```
-   > ⚠️ This onepage is stale. Reason: added m-stk-001, m-cst-002 (2026-05-08).
-   > Run `/ux-project:onepage` to regenerate (will produce a diff).
-   ```
+| Memory type / content cue | Likely affected phase(s) |
+|---|---|
+| `stakeholder` / about target users / new persona | Phase 1 |
+| `baseline` / current behavior / online metric | Phase 1 |
+| `constraint` / hard limit / Eng / compliance | Phase 2 |
+| `decision` (D<n>) | Phase 2 |
+| `assumption` (A<n>) | Phase 2 |
+| `terminology` / new term shaping framing | Phase 1 + Phase 2 |
+| `history` / past attempt / lesson | Phase 2 |
+| `preference` / design direction signal | Phase 2 + Phase 3 |
+| Content about IA / flow / structure | Phase 3 |
+| Free-form raw blob with unclear mapping | **All three** (conservative) |
 
-If banner already exists from a previous /add-context, append the new m-ids to its reason line (don't duplicate banner).
+Surface the proposed classification to designer via `AskUserQuestion` (rule 9 memory write gate — same pattern as memory proposals; do NOT silently update state.md):
+
+```
+AskUserQuestion({
+  question: "新加的 context 影响了 phase <list of N>。在 state.md 里标对应的 stale_phase_<N>=true 吗？这样下次 /ux-project:refine 进来时会提示你 re-walk 那些 phase。",
+  options: [
+    { label: "✅ 标，按提议",         description: "认可分类，写入 state.md" },
+    { label: "✏️ 改一下影响的 phase",    description: "重选哪些 phase 受影响（multiSelect）" },
+    { label: "🚫 不标",                description: "新 context 不影响已确认 phase 的内容" }
+  ],
+  allow_other: true
+})
+```
+
+Branch:
+- **✅ 按提议** → Edit `projects/<project-name>/state.md` frontmatter: set `stale_phase_<N>: true` for each affected phase. Only set; never clear `false` here (clearing happens in `/ux-project:refine` after re-walk).
+- **✏️ 改一下** → fire a second `AskUserQuestion` with `multiSelect: true` and options `[Phase 1, Phase 2, Phase 3]`; apply the designer's selection.
+- **🚫 不标** → skip; state.md stale fields unchanged.
+
+**Edge case**: if the relevant `phase_<N>_confirmed_at` is still `null` (that phase hasn't been confirmed yet), don't mark stale_phase_N — the phase will absorb the new context naturally on its first walk-through. Only mark stale for phases with `phase_N_confirmed_at != null`.
 
 ### 10. Closing message
 
@@ -187,9 +211,9 @@ If banner already exists from a previous /add-context, append the new m-ids to i
 - New memory entries: <N> across <list of files>
 - background.md block: <YYYY-MM-DD HH:MM>
 - state.md last_updated: <today>
-- ux-onepage.md: [unchanged | marked stale (reason: …)]
+- state.md stale flags: [unchanged | stale_phase_<list>=true based on classification]  ★ v0.6
 
-下一步：继续讨论；或 `/ux-project:onepage` 重新生成（如已 stale）。
+下一步：继续讨论；或 `/ux-project:refine <name>` re-walk 标了 stale 的 phase（onepage 直接编辑，不需要 regen）。
 ```
 
 ## Failure modes
@@ -205,6 +229,6 @@ If banner already exists from a previous /add-context, append the new m-ids to i
 - Don't bypass per-entry confirm. Each proposed entry needs explicit yes/edit/skip.
 - Don't write to memory/ without confirming type assignment with the designer.
 - Don't auto-promote a preference to ux-kb-curated/designer-preferences.md (that's a separate flow, not this command's job).
-- Don't auto-regen ux-onepage.md. Only mark stale; designer triggers regen via `/ux-project:onepage`.
+- ★ v0.6 — Don't write whole-file stale flags to `ux-onepage.md` (those fields removed in v0.6 per rule 25). Instead write per-phase stale flags to `state.md` (`stale_phase_N`). Don't auto-run `/ux-project:refine` — designer chooses when to re-walk the stale phase(s). The Living Onepage is edited in place; no regeneration concept exists.
 - Don't extrapolate beyond the raw content. If something is implied, ask before classifying.
 - Don't silently overwrite existing memory entries — if a new entry conflicts with an existing one, propose `superseded-by:<old-id>` explicitly.

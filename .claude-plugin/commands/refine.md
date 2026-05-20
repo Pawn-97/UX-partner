@@ -1,12 +1,12 @@
 ---
-description: ★ v0.4 — Run the 3-phase gated UX discovery workflow (Understand & Expand → Evaluate & Converge → Sharpen & Ship). Each phase ends with a mandatory AskUserQuestion confirmation gate. Phase 3 closure triggers /ux-project:onepage to produce ux-onepage.md + ux-onepage.html (一图流).
+description: ★ v0.6 — Run the 3-phase gated UX discovery workflow on the Living Onepage (rule 25). Each phase incrementally fills `projects/<name>/ux-onepage.md` (stubbed at /ux-project:start) — Phase 1 writes problem + 3 JTBD scenarios + scenario map; Phase 2 writes constraints + decisions + not-doing; Phase 3 writes IA + flow + handoff. Phase 3 confirm gate runs cite-check + promotes [^d]/[^a] draft tags to [ref:...]. After phase 3 confirm, designer runs /ux-project:export-html to render HTML (no auto-trigger).
 argument-hint: [<project-name>]  (optional; uses last active if omitted)
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
 
-You are running the `/ux-project:refine` command. Activate the `ux-discovery` skill's principles (especially rules 18–21).
+You are running the `/ux-project:refine` command. Activate the `ux-discovery` skill's principles (especially rules 18–21 and **rule 25 Living Onepage**).
 
-This is the **3-phase gated refinement workflow** — the primary entry point for v0.4 discovery work.
+This is the **3-phase gated refinement workflow** — the primary entry point for v0.6 discovery work. Each phase fills a specific H2 group in `ux-onepage.md` per rule 25's phase→section mapping.
 
 ## Arguments
 
@@ -25,7 +25,7 @@ This is the **3-phase gated refinement workflow** — the primary entry point fo
    - `phase_1_expand` + not confirmed → continue Phase 1
    - `phase_2_converge` → start/continue Phase 2
    - `phase_3_ship` → start/continue Phase 3
-   - `ready_for_onepage` → all 3 phases confirmed; recommend `/ux-project:onepage`
+   - `ready_for_onepage` → all 3 phases confirmed; recommend `/ux-project:export-html` (★ v0.6 — renamed from `/ux-project:onepage`)
    - `onepage-generated` → onepage already shipped; ask if designer wants to regenerate (set phase back) or `/ux-project:handoff`
 
 4. Surface resume state to designer (single line summary):
@@ -39,7 +39,63 @@ This is the **3-phase gated refinement workflow** — the primary entry point fo
 
 ## Phase 1 — Understand & Expand (Divergent)
 
-**Goal**: Lock task goal + background + online-behavior baseline; expand 6–12 plausibly-relevant user scenarios.
+**Goal**: Fill Phase 1 group of `ux-onepage.md` (PRD 一句话总结 + §1-7 + §14). The first concrete write is the PRD summary + 3 JTBD scenarios — designer's main checkpoint for "did AI understand what this task is solving."
+
+### ★ v0.6 Step 2a — Write PRD 一句话总结 + 1 叙事用户场景 to onepage (rule 25 Phase 1 micro-flow)
+
+**This is the FIRST visible write to `projects/<name>/ux-onepage.md` after the stub was created at `/ux-project:start`.** Per rule 25, this happens BEFORE other Phase 1 work — designer needs an immediate concrete artifact to react to.
+
+1. **Silent prep**:
+   - Read `projects/<name>/pm-source.md` with `limit` (header + first 80 lines max; or full read for short PRDs)
+   - Run a quiet `ctx_search` pass for the PRD's main keywords (rule 23 / KB-first)
+   - DO NOT echo "found in zoomkb wiki..." / "related KB context..." / similar to designer (rule 25 + user pref)
+   - Hold source info in conversation context only — do NOT write any `[ref:...]` / `[^d<n>]` / `[^a<n>]` markers into the file. Onepage body stays clean prose (rule 25 v0.6 cite policy)
+
+2. **Edit `projects/<name>/ux-onepage.md`** — fill these two placeholders only (leave other Phase 1 sections as stubs for now):
+
+   **a) `### PRD 一句话总结`** subsection — replace placeholder with a **50-100 字** paragraph summarizing the PRD. Must cover three angles: (1) **现状/问题** — what's wrong today, (2) **改动核心** — what the feature actually does, (3) **关键产品价值** — what the user gains. No inline ref / markers.
+
+   **b) `### 用户场景`** subsection — write **1 most typical** narrative scenario using this exact 4-field format:
+   ```markdown
+   #### <scenario title>
+
+   **用户**：<who — role + brief context>
+
+   **场景**：<situation — 1-2 sentences describing when/where this happens>
+
+   **新流程怎么用**：<paragraph: how would the feature actually be used in this scenario, concrete and vivid>
+
+   **产品价值**：<why this matters / what the user gets — 1-2 sentences>
+   ```
+
+   **Key rules for the scenario:**
+   - **NOT JTBD format.** Do NOT write "当 X，Y 想要 Z，以便 W" sentences. JTBD ("When X, I want Y, so I can Z") is Phase 2's convergence product, NOT a Phase 1 starting point. Phase 1 scenario is an *exploratory narrative* showing "what this task COULD be solving" — let designer eyeball whether AI grasped intent.
+   - **Only 1 scenario** (not 3, not 5-8). Pick the **most typical** flow that best conveys the task's core intent. Variations and edge cases come later via Phase 1 lens expansion (§14) and Phase 2 convergence.
+   - **No inline refs / markers anywhere in scenario body.** Clean prose. Agent's internal context holds source info; phase 3 confirm gate re-derives sources when needed.
+   - **Concrete, vivid language.** Use specific personas ("小公司 IT admin (兼任 ops)"), specific situations ("公司从其他运营商把 50 个号码 port 到 Zoom"), specific outcomes ("admin 不用 port 完 Voice 之后再单独走一遍 SMS 配置"). Not abstract.
+
+3. **Tell designer briefly** (plain Chinese, rule 22):
+   > "我把对 PRD 的理解（50-100 字总结）+ 1 个最典型的用户场景写到 ux-onepage.md 的 Phase 1 区了。打开看看，是不是抓到了重点。这是 Phase 1 起步的探索性描述，不是 JTBD —— JTBD 要 Phase 1+2 讨论清楚后才产出。"
+
+4. **Fire the review gate**:
+   ```
+   AskUserQuestion({
+     question: "PRD 总结和这个场景，看着对吗？",
+     options: [
+       { label: "✅ 对，继续往下",   description: "理解准确，继续问背景问题" },
+       { label: "✏️ 要改",            description: "总结或场景某个字段要修" },
+       { label: "➕ 想细看",          description: "场景需要更具体的内容" },
+       { label: "❌ 整个重写",        description: "理解偏了，重新来" }
+     ],
+     allow_other: true
+   })
+   ```
+
+5. **Branch**:
+   - ✅ → continue to Step 2 (Restate goal) and onward through normal Phase 1
+   - ✏️ → ask which field (PRD summary / scenario title / 用户 / 场景 / 新流程怎么用 / 产品价值) to revise; edit in-place; re-fire this gate
+   - ➕ → expand a specific field (often **新流程怎么用** or **产品价值**) with more depth; re-fire
+   - ❌ → ask 1-2 clarifying questions; redo step 2-3 from updated understanding
 
 ### Step 2 — Restate goal
 
@@ -118,6 +174,24 @@ AskUserQuestion({
 | 3 | 约束 | 时间 / 技术 / 合规 / 团队上有什么硬限制？ |
 | 4 | 现状基线 ★ v0.4 | 用户现在是怎么解决这件事的？有什么数据 / 痛点 / 临时方案？ — 答不上 → 写入 `questions.md` 标 blocking |
 | 5 | 历史尝试 | 之前试过什么方法？为什么没成？ |
+| 6 | 其他 context ★ v0.6 | 还有别的相关 context 需要补充吗？比如 PRD 没写到的限制、之前的设计稿、对类似功能的经验等 |
+
+**★ v0.6 — Dimension 6 注意（rule 25）**: 这条**永远走 C 分支**（永远开问，不查 KB），且**永远是最后一个 fire 的**——前面 5 个维度问完之后专门来一次。`AskUserQuestion` 选项给"贴文字 / 给路径 / 暂停 / 没了"四类：
+
+```
+AskUserQuestion({
+  question: "还有别的相关 context 需要补充吗？比如 PRD 没写到的限制、之前的设计稿、对类似功能的经验等。",
+  options: [
+    { label: "✅ 没有，可以继续",      description: "现有信息够用了" },
+    { label: "📎 有，我贴文字",         description: "把内容粘上来" },
+    { label: "📂 有，我给文件路径",      description: "本地有 .md / .docx，我给路径" },
+    { label: "⏸ 先暂停，让我想想",     description: "去翻一下别的资料再来" }
+  ],
+  allow_other: true
+})
+```
+
+命中"贴文字" / "给路径" → invoke `/ux-project:add-context` 流程（会自动 set `stale_phase_1=true` 等并 propose memory entries 走 confirm gate）。Add-context 完成后**回到 Dimension 6 循环再问一次**，直到设计师选 ✅ 没有 才继续往 Step 5 / 6 / 7。
 
 **对设计师呈现的开头话术**（说人话，不暴露搜索过程）:
 
@@ -311,7 +385,7 @@ If designer wants a visual preview before gate, generate a minimal HTML snippet 
 - JTBD cards (KEEP set)
 - Not Doing list
 
-This is a preview only — full HTML is generated at Phase 3 close via `/ux-project:onepage`.
+This is a preview only — full HTML is generated AFTER Phase 3 confirm gate (step 16) via `/ux-project:export-html`.
 
 ### Step 12 — Phase 2 Gate
 
@@ -473,49 +547,133 @@ New_feature 模式：纯路径，无类型标注。
 如果发现 iteration 项目里**所有**覆盖都是 (已有)，同样提示：
 > "看起来没什么新东西，是不是其实是个 refactor 或者不需要做？"
 
-### Step 16 — Phase 3 Gate (final approval)
+### Step 16 — ★ v0.6 — Phase 3 confirm gate (with inline cite-check + promote)
+
+Before firing the Phase 3 gate, **run the checks below IN ORDER**. If any fails, surface the failure list and do NOT fire the gate — wait for designer to fix, then re-run from the failing check.
+
+#### Step 16a — ★ v0.6 — Source re-derivation (rule 3 + rule 25, v0.6 final policy)
+
+`ux-onepage.md` body does NOT contain `[ref:...]` / `[^d]` / `[^a]` markers in v0.6 (clean-prose policy). Source tracking is internal. Phase 3 confirm re-derives sources fresh in a table for designer approval:
+
+1. **Walk substantive claims** in body sections (Phase 1: §1-§5 + 用户场景 + §14; Phase 2: §6 / §8-§12 / §15; Phase 3: §13 / §16 / §17). A "substantive claim" = any specific assertion that could be fabricated (number / decision / user behavior / scenario detail). Pure descriptive prose explaining structure ("整个产品的内容怎么组织在一起") is NOT a substantive claim.
+
+2. **Re-derive source** for each claim from PRD / KB / memory based on conversation context + fresh `ctx_search` if needed.
+
+3. **Build a `claim ↔ proposed source` table** for designer review:
+   ```
+   | # | Section | Claim (≤ 30 字 excerpt) | Proposed source |
+   |---|---|---|---|
+   | 1 | Phase 1 / Final Goal | "..." | pm-source.md:L<n> |
+   | 2 | Phase 1 / 用户场景 / 场景 1 / 新流程怎么用 | "..." | pm-source.md:L102 |
+   | 3 | Phase 2 / Decisions / D1 | "..." | decisions.md:D1 |
+   ```
+
+4. **Surface table to designer** via plain text (this IS the v0.6 cite-check audit moment — table shown ONCE at phase 3 finale, no inline pollution in onepage).
+
+5. **Fire `AskUserQuestion`** (batched per section group, or per-claim if controversial):
+   ```
+   AskUserQuestion({
+     question: "上面 N 条 claim 的 source 都查过了，approve 这一批吗？",
+     options: [
+       { label: "✅ 全部 approve",         description: "table 里的 source 都对" },
+       { label: "✏️ 个别要改",               description: "几条 source 不对，我指明" },
+       { label: "❌ 找不到 source 的 drop",  description: "没 source 的 claim 删掉或挪进 assumptions.md" }
+     ],
+     allow_other: true
+   })
+   ```
+
+6. **Process decisions**:
+   - ✅ → approved sources logged to `decisions.md` / `assumptions.md` (existing v0.1 files). **NOT written into ux-onepage.md body.**
+   - ✏️ → ask which claim & what source; update internal table; re-fire
+   - ❌ → for orphan claims, designer drops (Edit onepage to remove the claim) or promotes to assumption (append to `assumptions.md` as A<n>); re-walk affected section
+
+**Onepage body stays in clean prose throughout this process.** Never introduce `[ref:...]` / `[^d]` / `[^a]` markers. Audit trail lives in `decisions.md` / `assumptions.md` / agent's reasoning context — not in the artifact designer reads.
+
+#### Step 16b — ★ v0.4.3 — Iteration cite-check (rule 24)
+
+If `change_type ∈ {iteration, refactor}`:
+- Every `★NEW` / `:::new` node MUST trace to a KEEP JTBD or PRD-new-need cite
+- Every `(已有)` / `:::existing` node MUST trace to a `memory/baseline.md` active entry
+- Every `(改造)` / `:::modified` node MUST trace to BOTH baseline + new-need cite
+
+If mismatch → BLOCKED with orphan node list, ask designer to fix marker or add baseline entry.
+
+If `change_type == new_feature` but `★NEW` / `(改造)` / `(已有)` markers appear → BLOCKED.
+
+#### Step 16c — ★ v0.6 — Memory status + outdated PRD checks (rule 4 + rule 12)
+
+In v0.6 refs live in `decisions.md` / `assumptions.md` (not onepage body). Apply checks to those files plus the proposed-source table from Step 16a:
+
+For every memory cite (`memory/<type>.md#m-<id>`) referenced in `decisions.md` / `assumptions.md` or in the Step 16a proposed-source table:
+- Read entry, check `status` field
+- If `status != active` → BLOCKED, list with suggestion to update cite or remove
+
+For every PRD line (`pm-source.md:L...`) in the Step 16a proposed-source table:
+- Read PRD's `valid_to` frontmatter
+- If `valid_to != null` AND `valid_to < <today>` → SURFACE warning with `superseded_by`, ask designer: continue with outdated source / update to newer PRD line / abort
+
+#### Step 16d — ★ v0.6 — (Folded into Step 16a; skip)
+
+The previous "Promote draft / assumption tags" substep is **removed in v0.6 final cite policy**. Onepage body never carries `[^d]` / `[^a]` markers in v0.6 (clean-prose policy, rule 25). Source re-derivation + designer approve happens inline in **Step 16a** above. Proceed to Step 16e.
+
+#### Step 16e — Closure readiness check
+
+Output the closure summary table:
+
+```markdown
+## Closure Readiness — <project-name>
+
+| Dimension | Status | Notes |
+|---|---|---|
+| Goal clarity | ✅/⚠/❌ | ... |
+| User clarity | ✅/⚠/❌ | ... |
+| Behavior clarity | ✅/⚠/❌ | ... |
+| JTBD clarity | ✅/⚠/❌ | ... |
+| Risk clarity | ✅/⚠/❌ | ... |
+| Handoff readiness | ✅/⚠/❌ | ... |
+
+**Recommendation**: [continue discussion / close with caveats / ready to close]
+```
+
+#### Step 16f — Fire the Phase 3 gate
 
 ```
 AskUserQuestion({
-  question: "信息架构和流程都看过了。可以生成最终的 UX 设计单页（md + 网页）了吗？",
+  question: "信息架构和流程都看过了。所有 cite/draft 标签都校验通过。可以确认 phase 3 收尾吗？",
   options: [
-    { label: "✅ 可以生成",      description: "结构、流程、用户需求都对" },
-    { label: "✏️ 还要改一下",     description: "结构或流程某段需要调整" },
-    { label: "⚠️ 带保留意见生成", description: "整体可以，但有几个未确定的点要单独记到问题清单" },
-    { label: "⏸ 先暂停",        description: "先不生成" }
+    { label: "✅ 可以收尾",          description: "结构、流程、用户需求都对" },
+    { label: "✏️ 还要改一下",          description: "结构或流程某段需要调整" },
+    { label: "⚠️ 带保留意见收尾",      description: "整体可以，但有几个未确定的点要单独记到问题清单" },
+    { label: "⏸ 先暂停",            description: "先不收尾" }
   ],
   allow_other: true
 })
 ```
 
 Branch:
-- ✅ 可以生成 → set `phase_3_confirmed_at: <today>`, `phase: ready_for_onepage`. Run `/ux-project:onepage` next.
-- ⚠️ 带保留意见生成 → write caveats to `questions.md` (one `AskUserQuestion` per caveat to confirm); then proceed as approve.
+- ✅ 可以收尾 → set `phase_3_confirmed_at: <today>`, `phase: ready_for_onepage` in `state.md`. Proceed to step 17.
+- ⚠️ 带保留意见收尾 → write caveats to `questions.md` (one `AskUserQuestion` per caveat to confirm); then proceed as approve.
 - ✏️ 还要改一下 → loop back to step 13 / 14 / 15.
 - ⏸ 先暂停 → save state; exit.
 
 ---
 
-## Step 17 — Trigger `/ux-project:onepage`
+## Step 17 — ★ v0.6 — Closing message (designer runs /ux-project:export-html)
 
-On Ship: call `/ux-project:onepage` (the cite-check + final generation primitive). The onepage command will:
-- Run cite-check, memory status check, outdated check
-- Run closure readiness check
-- Generate `ux-onepage.md` (markdown deliverable)
-- Generate `ux-onepage.html` (HTML 一图流 — see `ux-onepage.html.template`)
-- Update `state.md`: `phase: onepage-generated`
-
-When `/ux-project:onepage` completes, surface the closing message (use plain Chinese, no "Phase" jargon):
+After Phase 3 confirm gate passes (step 16f), output this closing message (plain Chinese, rule 22):
 
 ```
-✅ 全部完成。UX 设计单页已经生成：
-   - ux-onepage.md   （markdown 版，给开发 / 评审用）
-   - ux-onepage.html （网页版一图流，可以直接发给协作方看）
+✅ Phase 3 已收尾。ux-onepage.md 内容已完整、所有 cite 校验通过、draft / assumption 标签已 promote 为 ref。
 
-下一步可以：
-- 双击 ux-onepage.html 在浏览器里看效果
-- /ux-project:handoff  生成给下一步设计环节的简报
+文件位置：projects/<project-name>/ux-onepage.md
+
+下一步：
+- /ux-project:export-html <project-name>  把 .md 渲染成 .html 一图流（给协作方看）
+- /ux-project:handoff <project-name>      生成给下游设计环节的简报
 ```
+
+★ v0.6 — Do **NOT** auto-trigger `/ux-project:export-html` here (rule 25). Designer runs it explicitly when ready. The Living Onepage `ux-onepage.md` IS the final source-of-truth artifact; HTML is a derived view.
 
 ---
 
@@ -533,5 +691,5 @@ When `/ux-project:onepage` completes, surface the closing message (use plain Chi
 - Don't auto-advance phases. Designer Approves each gate explicitly.
 - Don't bulk-load `pm-source.md`. Use `limit` parameter on Read.
 - Don't propose memory entries silently. Use the standard write gate (rule 9).
-- Don't generate `ux-onepage.html` directly here — let `/ux-project:onepage` own that. This command orchestrates the 3 phases; onepage primitive generates the deliverables.
+- Don't generate `ux-onepage.html` directly here — let `/ux-project:export-html` own that. Phase 3 confirm gate (step 16) owns cite-check + draft→ref promote; this command orchestrates the 3 phases and writes the final `ux-onepage.md`; `/ux-project:export-html` is purely the .md → .html renderer.
 - Don't break the cite-or-die discipline. Every scenario / JTBD / IA block / flow node that asserts a fact needs a `[ref: ...]`.

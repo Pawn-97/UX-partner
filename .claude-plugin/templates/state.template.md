@@ -7,6 +7,9 @@ phase: intake
 phase_1_confirmed_at: null
 phase_2_confirmed_at: null
 phase_3_confirmed_at: null
+stale_phase_1: false
+stale_phase_2: false
+stale_phase_3: false
 auto_propose: true
 auto_propose_mode: batched
 change_type: unknown
@@ -25,6 +28,13 @@ phase enum ★ v0.4: intake | phase_1_expand | phase_2_converge | phase_3_ship |
 ★ v0.2 SIZE CAP: state.md body ≤ 30 lines / < 1k tokens (excluding frontmatter and HTML comments).
 On overflow, the skill demotes the oldest Memory Index entries (entries stay in memory/<file>.md;
 only the state.md index pointer drops). The "# Recommended Next Step" section is NEVER demoted.
+
+★ v0.6 stale_phase_N tracking:
+- Three boolean fields mark which phase(s) of the ux-onepage have content invalidated by newly added context.
+- /ux-project:add-context sets the affected stale_phase_N=true (heuristic: problem/users/scenarios → 1; constraints/decisions/assumptions → 2; IA/flow → 3; uncertain → set all three).
+- Cleared to false only when the designer confirms the relevant phase has been re-walked or the new context has been absorbed.
+- Resume / refine reads these on entry; any true triggers an AskUserQuestion gate before continuing.
+- Replaces the legacy whole-file stale/stale_reason fields that lived on ux-onepage.md frontmatter (removed in v0.6).
 
 This file is the resume gateway. Update on every meaningful state change.
 Other project files (decisions/assumptions/questions/memory/*) are read on demand only.
