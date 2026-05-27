@@ -5,7 +5,7 @@ last_updated: <YYYY-MM-DD>
 ---
 
 <!--
-★ v0.4 — Project-level context-memory: online behavior baseline.
+Project-level context-memory: online behavior baseline.
 
 This captures what currently exists in production / in the real world today, BEFORE the new PRD ships.
 The skill MUST gather this in Phase 1 (Understand & Expand). Without baseline, scenario expansion is grounded in guesses, not reality.

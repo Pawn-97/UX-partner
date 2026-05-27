@@ -1,5 +1,5 @@
 ---
-description: ★ v0.6 — Append context to current project. Classify input and propose memory writes (stakeholder / constraint / terminology / history / preference / decision / assumption / baseline). After confirm, write to memory/<file>.md and append raw to background.md. Mark per-phase stale flags (stale_phase_N) on state.md based on which phase(s) the context affects (rule 25). Living Onepage is edited in place — no regeneration.
+description: Append context to current project. Classify input and propose memory writes (stakeholder / constraint / terminology / history / preference / decision / assumption / baseline). After confirm, write to memory/<file>.md and append raw to background.md. Mark per-phase stale flags (stale_phase_N) on state.md based on which phase(s) the context affects (rule 25). Living Onepage is edited in place — no regeneration.
 argument-hint: <project-name> <text-or-file-path>
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
@@ -62,10 +62,10 @@ Read the raw content. For each distinct claim/fact, classify into ONE of:
 | terminology | memory/terminology.md | project-specific term definitions |
 | history | memory/history.md | event in project timeline (PRD revision / scope change) |
 | preference | memory/preferences.md | project-internal design preference |
-| decision | decisions.md (v0.1) | confirmed design decision |
-| assumption | assumptions.md (v0.1) | unconfirmed working hypothesis |
+| decision | decisions.md | confirmed design decision |
+| assumption | assumptions.md | unconfirmed working hypothesis |
 
-If a claim could fit two types, prefer the more specific one (constraint > stakeholder; terminology > preference). **★ v0.3 — When truly ambiguous, ask via `AskUserQuestion` (SKILL.md § Question UI contract):**
+If a claim could fit two types, prefer the more specific one (constraint > stakeholder; terminology > preference). **When truly ambiguous, ask via `AskUserQuestion` (SKILL.md § Question UI contract):**
 
 ```
 AskUserQuestion({
@@ -76,8 +76,8 @@ AskUserQuestion({
     { label: "Terminology", description: "项目特定术语、缩写、产品名" },
     { label: "History",     description: "之前发生过的事、试过的方案、教训" },
     { label: "Preference",  description: "设计师/团队偏好" },
-    { label: "Decision",    description: "已确认的设计决策（v0.1 decisions.md）" },
-    { label: "Assumption",  description: "未确认的工作假设（v0.1 assumptions.md）" },
+    { label: "Decision",    description: "已确认的设计决策（decisions.md）" },
+    { label: "Assumption",  description: "未确认的工作假设（assumptions.md）" },
     { label: "Skip",        description: "不分类，跳过这条" }
   ],
   allow_other: true
@@ -101,7 +101,7 @@ Proposed entry for memory/<type>.md:
 
 ```
 
-**★ v0.3 — Then fire the confirm gate via `AskUserQuestion`:**
+**Then fire the confirm gate via `AskUserQuestion`:**
 
 ```
 AskUserQuestion({
@@ -121,8 +121,8 @@ ID generation: `m-<prefix>-<6 chars from hash(content + date)>`. Prefixes:
 - terminology → m-trm
 - history → m-hst
 - preference → m-prf
-- decision → D<n> (v0.1 numbering — read decisions.md last D<n> + 1)
-- assumption → A<n> (v0.1 numbering — read assumptions.md last A<n> + 1)
+- decision → D<n> (read decisions.md last D<n> + 1)
+- assumption → A<n> (read assumptions.md last A<n> + 1)
 
 Branch on the picker result:
 - ✅ Yes → write
@@ -136,7 +136,7 @@ For each confirmed entry:
 - Append entry to `# Active` section (preserve YAML-like list format from template)
 - Update target file's frontmatter `last_updated` to today
 
-For decisions/assumptions: append to existing v0.1 file (decisions.md / assumptions.md) using v0.1 entry format.
+For decisions/assumptions: append to existing file (decisions.md / assumptions.md) using the existing entry format.
 
 ### 7. Update background.md trace
 
@@ -164,9 +164,9 @@ Read `projects/<project-name>/state.md`. Then:
 - If still > 30 after demotion: warn designer:
   > ⚠️ state.md still exceeds 30-line cap after demotion. Consider archiving old decisions/assumptions/questions.
 
-### 9. ★ v0.6 — Mark affected phase(s) stale in state.md (rule 25)
+### 9. Mark affected phase(s) stale in state.md (rule 25)
 
-> **v0.6 supersedes v0.2-v0.5**: whole-file `stale` / `stale_reason` fields on `ux-onepage.md` were REMOVED. Stale tracking moved to per-phase booleans on `state.md`. The Living Onepage is edited in place (no regeneration concept).
+> ** supersedes **: whole-file `stale` / `stale_reason` fields on `ux-onepage.md` were REMOVED. Stale tracking moved to per-phase booleans on `state.md`. The Living Onepage is edited in place (no regeneration concept).
 
 Classify each confirmed memory entry by **which phase(s)** of the onepage it most likely affects, using this heuristic:
 
@@ -211,8 +211,7 @@ Branch:
 - New memory entries: <N> across <list of files>
 - background.md block: <YYYY-MM-DD HH:MM>
 - state.md last_updated: <today>
-- state.md stale flags: [unchanged | stale_phase_<list>=true based on classification]  ★ v0.6
-
+- state.md stale flags: [unchanged | stale_phase_<list>=true based on classification]
 下一步：继续讨论；或 `/ux-project:refine <name>` re-walk 标了 stale 的 phase（onepage 直接编辑，不需要 regen）。
 ```
 
@@ -229,6 +228,6 @@ Branch:
 - Don't bypass per-entry confirm. Each proposed entry needs explicit yes/edit/skip.
 - Don't write to memory/ without confirming type assignment with the designer.
 - Don't auto-promote a preference to ux-kb-curated/designer-preferences.md (that's a separate flow, not this command's job).
-- ★ v0.6 — Don't write whole-file stale flags to `ux-onepage.md` (those fields removed in v0.6 per rule 25). Instead write per-phase stale flags to `state.md` (`stale_phase_N`). Don't auto-run `/ux-project:refine` — designer chooses when to re-walk the stale phase(s). The Living Onepage is edited in place; no regeneration concept exists.
+- Don't write whole-file stale flags to `ux-onepage.md` (those fields removed per rule 25). Instead write per-phase stale flags to `state.md` (`stale_phase_N`). Don't auto-run `/ux-project:refine` — designer chooses when to re-walk the stale phase(s). The Living Onepage is edited in place; no regeneration concept exists.
 - Don't extrapolate beyond the raw content. If something is implied, ask before classifying.
 - Don't silently overwrite existing memory entries — if a new entry conflicts with an existing one, propose `superseded-by:<old-id>` explicitly.

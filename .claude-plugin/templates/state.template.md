@@ -16,36 +16,36 @@ change_type: unknown
 ---
 
 <!--
-phase enum ★ v0.4: intake | phase_1_expand | phase_2_converge | phase_3_ship | ready_for_onepage | onepage-generated | handoff-ready
-  (legacy v0.2 values "analysis | discussion | closure-check" map to phase_1_expand / phase_2_converge / phase_3_ship)
+phase enum: intake | phase_1_expand | phase_2_converge | phase_3_ship | ready_for_onepage | onepage-generated | handoff-ready
+Legacy values "analysis | discussion | closure-check" map to phase_1_expand / phase_2_converge / phase_3_ship.
 
-★ v0.4 phase gate state contract:
+phase gate state contract:
 - phase advances only when designer Approves the gate AskUserQuestion (SKILL.md rule 18)
 - phase_N_confirmed_at is set on Approve and never silently cleared
 - /ux-project:resume <name> reads `phase` and `phase_N_confirmed_at` to pick up at the right place
-- Regression (designer goes back to earlier phase): set phase backward, append a decisions.md entry as audit trail; preserve confirmed-at timestamps
+- Regression (designer goes back to earlier phase): set phase backward, append a decisions.md entry as audit trail, and preserve confirmed-at timestamps.
 
-★ v0.2 SIZE CAP: state.md body ≤ 30 lines / < 1k tokens (excluding frontmatter and HTML comments).
+SIZE CAP: state.md body ≤ 30 lines / < 1k tokens (excluding frontmatter and HTML comments).
 On overflow, the skill demotes the oldest Memory Index entries (entries stay in memory/<file>.md;
 only the state.md index pointer drops). The "# Recommended Next Step" section is NEVER demoted.
 
-★ v0.6 stale_phase_N tracking:
+stale_phase_N tracking:
 - Three boolean fields mark which phase(s) of the ux-onepage have content invalidated by newly added context.
 - /ux-project:add-context sets the affected stale_phase_N=true (heuristic: problem/users/scenarios → 1; constraints/decisions/assumptions → 2; IA/flow → 3; uncertain → set all three).
 - Cleared to false only when the designer confirms the relevant phase has been re-walked or the new context has been absorbed.
 - Resume / refine reads these on entry; any true triggers an AskUserQuestion gate before continuing.
-- Replaces the legacy whole-file stale/stale_reason fields that lived on ux-onepage.md frontmatter (removed in v0.6).
+- Replaces the legacy whole-file stale/stale_reason fields that lived on ux-onepage.md frontmatter (removed).
 
 This file is the resume gateway. Update on every meaningful state change.
 Other project files (decisions/assumptions/questions/memory/*) are read on demand only.
 
-★ v0.2 auto-propose config:
+auto-propose config:
 - auto_propose: true (default) | false → controls whether the skill auto-proposes memory entries from conversation
 - auto_propose_mode: batched (default, every 5 rounds) | per-utterance (high noise, not recommended)
 
-★ v0.4.3 change_type ★:
+change_type:
 - new_feature: 全新功能，没有已有流程要保留 → IA / 流程不需要区分新旧
-- iteration:   在已有功能基础上的增量改动 → IA / 流程必须标 "★ NEW / (改造) / (已有)"
+- iteration:   在已有功能基础上的增量改动 → IA / 流程必须标 "★NEW / (改造) / (已有)"
 - refactor:    重组已有流程，无新用户可见行为 → 同 iteration，标记侧重 (改造) 和 (已有)
 - unknown:     默认初值，Phase 1 baseline 收集后必须由设计师确认（不能跨过 Phase 1 gate 仍 unknown）
 -->
@@ -70,7 +70,7 @@ Other project files (decisions/assumptions/questions/memory/*) are read on deman
 # Memory Index (top 3 ids per file)
 
 <!--
-★ v0.2 — Pointer-only index into memory/*.md. Do NOT inline content here — keep state.md small.
+Pointer-only index into memory/*.md. Do NOT inline content here — keep state.md small.
 Only list ids; full content lives in the memory file. Update when /ux-project:add-context writes new entries.
 
 - Stakeholders:  m-stk-001 / m-stk-002 / m-stk-003 → see memory/stakeholders.md
@@ -78,7 +78,7 @@ Only list ids; full content lives in the memory file. Update when /ux-project:ad
 - Terminology:   m-trm-001 → see memory/terminology.md
 - History:       m-hst-001 → see memory/history.md
 - Preferences:   m-prf-001 → see memory/preferences.md
-- Baseline:      m-bsl-001 / m-bsl-002 → see memory/baseline.md   ★ v0.4
+- Baseline:      m-bsl-001 / m-bsl-002 → see memory/baseline.md
 -->
 
 # Recommended Next Step

@@ -1,0 +1,52 @@
+{
+  "name": "ux-project",
+  "version": "0.6.1",
+  "description": "UX discovery partner for designers. Turns raw PM PRDs into cited UX onepages, stakeholder HTML onepagers, and design briefs through a gated discovery flow. This Codex adapter reuses the canonical Claude Code plugin rules in .claude-plugin/.",
+  "author": {
+    "name": "GuanchengDing"
+  },
+  "homepage": "https://github.com/Pawn-97/UX-partner",
+  "repository": "https://github.com/Pawn-97/UX-partner",
+  "license": "MIT",
+  "keywords": [
+    "ux",
+    "design",
+    "discovery",
+    "onepage",
+    "living-onepage",
+    "prd",
+    "jtbd",
+    "ia",
+    "interaction-flow",
+    "wireframe",
+    "design-partner",
+    "designer",
+    "memory",
+    "context-memory",
+    "html-onepager",
+    "swiss-style",
+    "ikb",
+    "klein-blue",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "UX Partner",
+    "shortDescription": "Turn PRDs into cited UX onepages and design briefs.",
+    "longDescription": "UX Partner helps designers turn raw PM PRDs into KB-grounded UX discovery files: ux-onepage.md, ux-onepage.html, and design-brief.md. It keeps scope upstream of hi-fi UI, asks for explicit approval at every decision point, and preserves project memory under projects/<name>/.",
+    "developerName": "GuanchengDing",
+    "category": "Design",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use /ux-project:start my-project ./prd.md to start UX discovery",
+      "Use /ux-project:refine to continue the gated UX onepage flow",
+      "Use /ux-project:export-html to render the stakeholder onepager"
+    ],
+    "brandColor": "#0B5CFF",
+    "screenshots": []
+  }
+}

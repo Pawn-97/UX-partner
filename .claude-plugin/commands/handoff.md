@@ -16,7 +16,7 @@ You are running the `/ux-project:handoff` command. Activate the `ux-discovery` s
 
 If `<project-name>` provided, verify `projects/<project-name>/` exists. If multiple projects could match (omitted arg or ambiguous reference), list them via `AskUserQuestion` and let designer pick.
 
-### 2. ★ v0.6 — Verify phase 3 is confirmed (rule 25)
+### 2. Verify phase 3 is confirmed (rule 25)
 
 Read `projects/<project-name>/state.md` frontmatter:
 - `phase_3_confirmed_at` MUST be set (not `null`) — phase 3 confirm gate must have passed (cite-check + draft→ref promote complete)
@@ -80,8 +80,8 @@ First exploration prompt ready for: huashu-design / frontend-design / Figma
 
 ## Failure modes
 
-- phase_3_confirmed_at == null → stop, suggest `/ux-project:refine <name>` to walk phase 3 confirm gate first. ★ v0.6 — ux-onepage.md always exists from `/ux-project:start` (stub), so the check moved to phase confirmation status.
-- ux-onepage.md has unresolved cite-check or outdated warnings (`⚠️` markers) → flag them; **★ v0.3 — confirm via `AskUserQuestion`** (SKILL.md § Question UI contract): `options: [✅ Continue / ❌ Stop / ✏️ Fix-first]`, `allow_other: true`. Don't silently propagate.
+- phase_3_confirmed_at == null → stop, suggest `/ux-project:refine <name>` to walk phase 3 confirm gate first. ux-onepage.md always exists from `/ux-project:start` (stub), so the check moved to phase confirmation status.
+- ux-onepage.md has unresolved cite-check or outdated warnings (`⚠️` markers) → flag them; **confirm via `AskUserQuestion`** (SKILL.md § Question UI contract): `options: [✅ Continue / ❌ Stop / ✏️ Fix-first]`, `allow_other: true`. Don't silently propagate.
 - Template not found → fall back to inline structure (see template content); warn that the plugin install may be incomplete.
 
 ## What NOT to do

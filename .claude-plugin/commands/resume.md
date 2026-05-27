@@ -16,7 +16,7 @@ If missing, list available projects:
 ls -d projects/*/ 2>/dev/null
 ```
 
-**★ v0.3 — Then fire `AskUserQuestion` with each project as an option** (SKILL.md § Question UI contract):
+**Then fire `AskUserQuestion` with each project as an option** (SKILL.md § Question UI contract):
 
 ```
 AskUserQuestion({
@@ -47,7 +47,7 @@ Output exactly this structure:
 ```markdown
 # Project Resumed: <project-name>
 
-**Phase:** <current phase>  •  **Last updated:** <date>  •  **PRD:** v<version>, valid_from <date>
+**Phase:** <current phase>  •  **Last updated:** <date>  •  **PRD:** v<release>, valid_from <date>
 
 ## Current Understanding
 <from state.md "Current Understanding" section, verbatim>
@@ -68,7 +68,7 @@ Output exactly this structure:
 
 ### 4. Suggest the next move
 
-After the summary, **★ v0.3 — fire `AskUserQuestion`** (SKILL.md § Question UI contract):
+After the summary, **fire `AskUserQuestion`** (SKILL.md § Question UI contract):
 
 ```
 AskUserQuestion({
@@ -78,7 +78,7 @@ AskUserQuestion({
     { label: "📋 Read decisions.md",     description: "看完整决策列表" },
     { label: "📋 Read assumptions.md",   description: "看完整假设列表" },
     { label: "📋 Read questions.md",     description: "看 open / answered questions" },
-    { label: "✍️ /ux-project:export-html", description: "★ v0.6 — phase 3 已确认就把 ux-onepage.md 导成 HTML 一图流；没确认先跑 /ux-project:refine" },
+    { label: "✍️ /ux-project:export-html", description: "phase 3 已确认就把 ux-onepage.md 导成 HTML 一图流；没确认先跑 /ux-project:refine" },
     { label: "➕ /ux-project:add-context", description: "补背景再继续" }
   ],
   allow_other: true

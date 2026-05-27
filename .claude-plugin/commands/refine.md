@@ -1,12 +1,12 @@
 ---
-description: ★ v0.6 — Run the 3-phase gated UX discovery workflow on the Living Onepage (rule 25). Each phase incrementally fills `projects/<name>/ux-onepage.md` (stubbed at /ux-project:start) — Phase 1 writes problem + 3 JTBD scenarios + scenario map; Phase 2 writes constraints + decisions + not-doing; Phase 3 writes IA + flow + handoff. Phase 3 confirm gate runs cite-check + promotes [^d]/[^a] draft tags to [ref:...]. After phase 3 confirm, designer runs /ux-project:export-html to render HTML (no auto-trigger).
+description: Run the 3-phase gated UX discovery workflow on the Living Onepage (rule 25). Each phase incrementally fills `projects/<name>/ux-onepage.md` (stubbed at /ux-project:start) — Phase 1 writes problem + 3 JTBD scenarios + scenario map; Phase 2 writes constraints + decisions + not-doing; Phase 3 writes IA + flow + handoff. Phase 3 confirm gate runs cite-check + promotes [^d]/[^a] draft tags to [ref: ...]. After phase 3 confirm, designer runs /ux-project:export-html to render HTML (no auto-trigger).
 argument-hint: [<project-name>]  (optional; uses last active if omitted)
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
 
 You are running the `/ux-project:refine` command. Activate the `ux-discovery` skill's principles (especially rules 18–21 and **rule 25 Living Onepage**).
 
-This is the **3-phase gated refinement workflow** — the primary entry point for v0.6 discovery work. Each phase fills a specific H2 group in `ux-onepage.md` per rule 25's phase→section mapping.
+This is the **3-phase gated refinement workflow** — the primary entry point for discovery work. Each phase fills a specific H2 group in `ux-onepage.md` per rule 25's phase→section mapping.
 
 ## Arguments
 
@@ -25,7 +25,7 @@ This is the **3-phase gated refinement workflow** — the primary entry point fo
    - `phase_1_expand` + not confirmed → continue Phase 1
    - `phase_2_converge` → start/continue Phase 2
    - `phase_3_ship` → start/continue Phase 3
-   - `ready_for_onepage` → all 3 phases confirmed; recommend `/ux-project:export-html` (★ v0.6 — renamed from `/ux-project:onepage`)
+   - `ready_for_onepage` → all 3 phases confirmed; recommend `/ux-project:export-html`
    - `onepage-generated` → onepage already shipped; ask if designer wants to regenerate (set phase back) or `/ux-project:handoff`
 
 4. Surface resume state to designer (single line summary):
@@ -41,7 +41,7 @@ This is the **3-phase gated refinement workflow** — the primary entry point fo
 
 **Goal**: Fill Phase 1 group of `ux-onepage.md` (PRD 一句话总结 + §1-7 + §14). The first concrete write is the PRD summary + 3 JTBD scenarios — designer's main checkpoint for "did AI understand what this task is solving."
 
-### ★ v0.6 Step 2a — Write PRD 一句话总结 + 1 叙事用户场景 to onepage (rule 25 Phase 1 micro-flow)
+### Step 2a — Write PRD 一句话总结 + 1 叙事用户场景 to onepage (rule 25 Phase 1 micro-flow)
 
 **This is the FIRST visible write to `projects/<name>/ux-onepage.md` after the stub was created at `/ux-project:start`.** Per rule 25, this happens BEFORE other Phase 1 work — designer needs an immediate concrete artifact to react to.
 
@@ -49,7 +49,7 @@ This is the **3-phase gated refinement workflow** — the primary entry point fo
    - Read `projects/<name>/pm-source.md` with `limit` (header + first 80 lines max; or full read for short PRDs)
    - Run a quiet `ctx_search` pass for the PRD's main keywords (rule 23 / KB-first)
    - DO NOT echo "found in zoomkb wiki..." / "related KB context..." / similar to designer (rule 25 + user pref)
-   - Hold source info in conversation context only — do NOT write any `[ref:...]` / `[^d<n>]` / `[^a<n>]` markers into the file. Onepage body stays clean prose (rule 25 v0.6 cite policy)
+   - Hold source info in conversation context only — do NOT write any `[ref: ...]` / `[^d<n>]` / `[^a<n>]` markers into the file. Onepage body stays clean prose (rule 25 cite policy)
 
 2. **Edit `projects/<name>/ux-onepage.md`** — fill these two placeholders only (leave other Phase 1 sections as stubs for now):
 
@@ -172,11 +172,11 @@ AskUserQuestion({
 | 1 | 主用户 | 这个功能主要给谁用？还有谁会受影响？ |
 | 2 | 成功标准 | 做对了应该看到什么？有数字目标还是体感目标？ |
 | 3 | 约束 | 时间 / 技术 / 合规 / 团队上有什么硬限制？ |
-| 4 | 现状基线 ★ v0.4 | 用户现在是怎么解决这件事的？有什么数据 / 痛点 / 临时方案？ — 答不上 → 写入 `questions.md` 标 blocking |
+| 4 | 现状基线 | 用户现在是怎么解决这件事的？有什么数据 / 痛点 / 临时方案？ — 答不上 → 写入 `questions.md` 标 blocking |
 | 5 | 历史尝试 | 之前试过什么方法？为什么没成？ |
-| 6 | 其他 context ★ v0.6 | 还有别的相关 context 需要补充吗？比如 PRD 没写到的限制、之前的设计稿、对类似功能的经验等 |
+| 6 | 其他 context | 还有别的相关 context 需要补充吗？比如 PRD 没写到的限制、之前的设计稿、对类似功能的经验等 |
 
-**★ v0.6 — Dimension 6 注意（rule 25）**: 这条**永远走 C 分支**（永远开问，不查 KB），且**永远是最后一个 fire 的**——前面 5 个维度问完之后专门来一次。`AskUserQuestion` 选项给"贴文字 / 给路径 / 暂停 / 没了"四类：
+**Dimension 6 注意（rule 25）**: 这条**永远走 C 分支**（永远开问，不查 KB），且**永远是最后一个 fire 的**——前面 5 个维度问完之后专门来一次。`AskUserQuestion` 选项给"贴文字 / 给路径 / 暂停 / 没了"四类：
 
 ```
 AskUserQuestion({
@@ -205,7 +205,7 @@ AskUserQuestion({
 
 设计师对**"已知"档**的确认本身就是对已有记忆的 re-validate——如果设计师说"要改"，把对应 memory entry 标 `superseded` 并写新条目（rule 12 memory status check）。
 
-### Step 5b — 确认 change_type（rule 24 — ★ v0.4.3）
+### Step 5b — 确认 change_type（rule 24）
 
 Background 维度收完、`memory/baseline.md` 写完之后，**必须**问一次：
 
@@ -357,7 +357,7 @@ S2 | uv=Low imp=High fit=Edge | decision=CUT  | reason=<...>
 
 对每条 KEEP 场景写成 JTBD 句式：`当 <情境>，我想 <动作>，从而 <目的>`。
 
-**Chat 展示**（rule 22.1.1）—— **不带 (← Sn) 映射，不带 [ref:...]，不报"D1 直接驱动的 N 个"等内部计数**:
+**Chat 展示**（rule 22.1.1）—— **不带 (← Sn) 映射，不带 [ref: ...]，不报"D1 直接驱动的 N 个"等内部计数**:
 
 ```
 Primary JTBD（核心需求）
@@ -412,7 +412,7 @@ Branch:
 
 **Goal**: IA structure + interaction flow → final `ux-onepage.md` + `ux-onepage.html`.
 
-### Step 13 — Draft IA structure (rule 21 + rule 24 — ★ v0.4.3)
+### Step 13 — Draft IA structure (rule 21 + rule 24)
 
 Build a nested container hierarchy. **Purpose labels only.** Forbidden: button / dropdown / modal / color / typography.
 
@@ -444,7 +444,7 @@ New_feature 模式（不带前缀）:
 │   └── <Section C> — <purpose label>
 ├── <Top-level area 2>
 │   └── <Section D> — <purpose label>
-└── ...
+└──...
 ```
 
 **iteration / refactor 模式的判定来源**:
@@ -466,7 +466,7 @@ options:
 
 新旧标记不对 → 让设计师指明哪个节点改归哪类；重画对应分支；re-fire。
 
-### Step 14 — Draft interaction flow (rule 21 + rule 24 — ★ v0.4.3)
+### Step 14 — Draft interaction flow (rule 21 + rule 24)
 
 Pick the right diagram type based on the flow's nature:
 - **State-heavy** (entity moves through states): `stateDiagram-v2`
@@ -525,7 +525,7 @@ options:
   - "🚫 删掉一条分支"   / "有分支多余"
 ```
 
-### Step 15 — JTBD ↔ IA/flow coverage check (rule 21 + rule 24 — ★ v0.4.3)
+### Step 15 — JTBD ↔ IA/flow coverage check (rule 21 + rule 24)
 
 For each KEEP JTBD, verify it maps to ≥1 IA branch AND ≥1 flow path. If any JTBD has no coverage, flag it and ask the designer how to address (add an IA section? Flow branch? Demote the JTBD?).
 
@@ -547,13 +547,13 @@ New_feature 模式：纯路径，无类型标注。
 如果发现 iteration 项目里**所有**覆盖都是 (已有)，同样提示：
 > "看起来没什么新东西，是不是其实是个 refactor 或者不需要做？"
 
-### Step 16 — ★ v0.6 — Phase 3 confirm gate (with inline cite-check + promote)
+### Step 16 — Phase 3 confirm gate (with inline cite-check + promote)
 
 Before firing the Phase 3 gate, **run the checks below IN ORDER**. If any fails, surface the failure list and do NOT fire the gate — wait for designer to fix, then re-run from the failing check.
 
-#### Step 16a — ★ v0.6 — Source re-derivation (rule 3 + rule 25, v0.6 final policy)
+#### Step 16a — Source re-derivation (rule 3 + rule 25 final policy)
 
-`ux-onepage.md` body does NOT contain `[ref:...]` / `[^d]` / `[^a]` markers in v0.6 (clean-prose policy). Source tracking is internal. Phase 3 confirm re-derives sources fresh in a table for designer approval:
+`ux-onepage.md` body does NOT contain `[ref: ...]` / `[^d]` / `[^a]` markers under the clean-prose policy. Source tracking is internal. Phase 3 confirm re-derives sources fresh in a table for designer approval:
 
 1. **Walk substantive claims** in body sections (Phase 1: §1-§5 + 用户场景 + §14; Phase 2: §6 / §8-§12 / §15; Phase 3: §13 / §16 / §17). A "substantive claim" = any specific assertion that could be fabricated (number / decision / user behavior / scenario detail). Pure descriptive prose explaining structure ("整个产品的内容怎么组织在一起") is NOT a substantive claim.
 
@@ -568,7 +568,7 @@ Before firing the Phase 3 gate, **run the checks below IN ORDER**. If any fails,
    | 3 | Phase 2 / Decisions / D1 | "..." | decisions.md:D1 |
    ```
 
-4. **Surface table to designer** via plain text (this IS the v0.6 cite-check audit moment — table shown ONCE at phase 3 finale, no inline pollution in onepage).
+4. **Surface table to designer** via plain text (this is the cite-check audit moment — table shown once at phase 3 finale, no inline pollution in onepage).
 
 5. **Fire `AskUserQuestion`** (batched per section group, or per-claim if controversial):
    ```
@@ -584,13 +584,13 @@ Before firing the Phase 3 gate, **run the checks below IN ORDER**. If any fails,
    ```
 
 6. **Process decisions**:
-   - ✅ → approved sources logged to `decisions.md` / `assumptions.md` (existing v0.1 files). **NOT written into ux-onepage.md body.**
+   - ✅ → approved sources logged to `decisions.md` / `assumptions.md` (existing files). **NOT written into ux-onepage.md body.**
    - ✏️ → ask which claim & what source; update internal table; re-fire
    - ❌ → for orphan claims, designer drops (Edit onepage to remove the claim) or promotes to assumption (append to `assumptions.md` as A<n>); re-walk affected section
 
-**Onepage body stays in clean prose throughout this process.** Never introduce `[ref:...]` / `[^d]` / `[^a]` markers. Audit trail lives in `decisions.md` / `assumptions.md` / agent's reasoning context — not in the artifact designer reads.
+**Onepage body stays in clean prose throughout this process.** Never introduce `[ref: ...]` / `[^d]` / `[^a]` markers. Audit trail lives in `decisions.md` / `assumptions.md` / agent's reasoning context — not in the artifact designer reads.
 
-#### Step 16b — ★ v0.4.3 — Iteration cite-check (rule 24)
+#### Step 16b — Iteration cite-check (rule 24)
 
 If `change_type ∈ {iteration, refactor}`:
 - Every `★NEW` / `:::new` node MUST trace to a KEEP JTBD or PRD-new-need cite
@@ -601,9 +601,9 @@ If mismatch → BLOCKED with orphan node list, ask designer to fix marker or add
 
 If `change_type == new_feature` but `★NEW` / `(改造)` / `(已有)` markers appear → BLOCKED.
 
-#### Step 16c — ★ v0.6 — Memory status + outdated PRD checks (rule 4 + rule 12)
+#### Step 16c — Memory status + outdated PRD checks (rule 4 + rule 12)
 
-In v0.6 refs live in `decisions.md` / `assumptions.md` (not onepage body). Apply checks to those files plus the proposed-source table from Step 16a:
+Refs live in `decisions.md` / `assumptions.md` (not onepage body). Apply checks to those files plus the proposed-source table from Step 16a:
 
 For every memory cite (`memory/<type>.md#m-<id>`) referenced in `decisions.md` / `assumptions.md` or in the Step 16a proposed-source table:
 - Read entry, check `status` field
@@ -613,9 +613,9 @@ For every PRD line (`pm-source.md:L...`) in the Step 16a proposed-source table:
 - Read PRD's `valid_to` frontmatter
 - If `valid_to != null` AND `valid_to < <today>` → SURFACE warning with `superseded_by`, ask designer: continue with outdated source / update to newer PRD line / abort
 
-#### Step 16d — ★ v0.6 — (Folded into Step 16a; skip)
+#### Step 16d — (Folded into Step 16a; skip)
 
-The previous "Promote draft / assumption tags" substep is **removed in v0.6 final cite policy**. Onepage body never carries `[^d]` / `[^a]` markers in v0.6 (clean-prose policy, rule 25). Source re-derivation + designer approve happens inline in **Step 16a** above. Proceed to Step 16e.
+The previous "Promote draft / assumption tags" substep is **removed in the final cite policy**. Onepage body never carries `[^d]` / `[^a]` markers under the clean-prose policy (rule 25). Source re-derivation + designer approve happens inline in **Step 16a** above. Proceed to Step 16e.
 
 #### Step 16e — Closure readiness check
 
@@ -659,7 +659,7 @@ Branch:
 
 ---
 
-## Step 17 — ★ v0.6 — Closing message (designer runs /ux-project:export-html)
+## Step 17 — Closing message (designer runs /ux-project:export-html)
 
 After Phase 3 confirm gate passes (step 16f), output this closing message (plain Chinese, rule 22):
 
@@ -669,11 +669,11 @@ After Phase 3 confirm gate passes (step 16f), output this closing message (plain
 文件位置：projects/<project-name>/ux-onepage.md
 
 下一步：
-- /ux-project:export-html <project-name>  把 .md 渲染成 .html 一图流（给协作方看）
+- /ux-project:export-html <project-name>  把.md 渲染成.html 一图流（给协作方看）
 - /ux-project:handoff <project-name>      生成给下游设计环节的简报
 ```
 
-★ v0.6 — Do **NOT** auto-trigger `/ux-project:export-html` here (rule 25). Designer runs it explicitly when ready. The Living Onepage `ux-onepage.md` IS the final source-of-truth artifact; HTML is a derived view.
+Do **NOT** auto-trigger `/ux-project:export-html` here (rule 25). Designer runs it explicitly when ready. The Living Onepage `ux-onepage.md` IS the final source-of-truth artifact; HTML is a derived view.
 
 ---
 
@@ -691,5 +691,5 @@ After Phase 3 confirm gate passes (step 16f), output this closing message (plain
 - Don't auto-advance phases. Designer Approves each gate explicitly.
 - Don't bulk-load `pm-source.md`. Use `limit` parameter on Read.
 - Don't propose memory entries silently. Use the standard write gate (rule 9).
-- Don't generate `ux-onepage.html` directly here — let `/ux-project:export-html` own that. Phase 3 confirm gate (step 16) owns cite-check + draft→ref promote; this command orchestrates the 3 phases and writes the final `ux-onepage.md`; `/ux-project:export-html` is purely the .md → .html renderer.
+- Don't generate `ux-onepage.html` directly here — let `/ux-project:export-html` own that. Phase 3 confirm gate (step 16) owns cite-check + draft→ref promote; this command orchestrates the 3 phases and writes the final `ux-onepage.md`; `/ux-project:export-html` only renders `.md` to `.html`.
 - Don't break the cite-or-die discipline. Every scenario / JTBD / IA block / flow node that asserts a fact needs a `[ref: ...]`.

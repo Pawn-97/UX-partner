@@ -32,6 +32,7 @@ venv/
 # Local environment
 .env
 .env.local
+/.claude/
 
 # Local-only notes (design history, Claude Code helper) — not for public repo
 /docs/

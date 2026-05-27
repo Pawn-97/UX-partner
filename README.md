@@ -1,122 +1,96 @@
 # UX Partner
 
-A Claude Code plugin that turns raw PM PRDs into KB-grounded UX discovery artifacts — `ux-onepage.md`, `ux-onepage.html` (一图流), and `design-brief.md` — through a 3-phase gated workflow.
+UX Partner turns a raw PM PRD into KB-grounded UX discovery files:
 
-Built for UX designers. Output is consumed directly by downstream design tools (huashu-design, frontend-design, Figma).
+- `ux-onepage.md` — cited source of truth for review and audit
+- `ux-onepage.html` — clean stakeholder onepager
+- `design-brief.md` — handoff for downstream UI, Figma, or frontend work
+
+It supports both Claude Code and Codex. The Claude Code plugin remains the canonical source under `.claude-plugin/`; Codex uses a thin adapter under `.codex-plugin/`, `skills/`, and `commands/`.
 
 **English** · [中文](README_CN.md)
 
-## What you get
+## Scope
 
-- **`ux-onepage.md`** — engineering-ready discovery doc with cite-or-die enforcement
-- **`ux-onepage.html`** — stakeholder-facing 一图流, Swiss IKB visual system, self-contained, print-friendly
-- **`design-brief.md`** — clean handoff for downstream design tools
-- **Project memory** — `decisions / assumptions / questions / memory/*` that survives across sessions
+In scope: problem framing, JTBD, user scenarios, IA structure, interaction flow, and container-level conceptual wireframes.
 
-## Scope boundary
+Out of scope: hi-fi UI, component-level wireframes, Figma files, visual styling, and frontend code. Those belong to downstream design or implementation tools.
 
-**In scope** (upstream design assets):
-problem framing · JTBD · scenario expand/converge · IA structure · interaction flow (B&W) · container-level wireframes
-
-**Out of scope** (downstream tools' job):
-hi-fi UI · component-level wireframes · Figma artifacts · color/typography · frontend code
-
-## Install
-
-### From marketplace (recommended)
+## Install In Claude Code
 
 Inside the Claude Code REPL:
 
-```
+```text
 /plugin marketplace add Pawn-97/UX-partner
 /plugin install ux-project@design-partner
 ```
 
-Restart Claude Code. The `ux-discovery` skill auto-triggers on phrases like "需求拆解 / JTBD 梳理 / PRD 分析 / ux discovery".
+Restart Claude Code or reload plugins.
 
-### Local clone (for development)
+## Install In Codex
+
+From Codex:
+
+```bash
+codex plugin marketplace add Pawn-97/UX-partner
+codex plugin add ux-project@design-partner
+```
+
+For local development:
 
 ```bash
 git clone git@github.com:Pawn-97/UX-partner.git Design-partner
 cd Design-partner
-claude
+codex plugin marketplace add "$(pwd)"
+codex plugin add ux-project@design-partner
 ```
-
-Then in the REPL:
-
-```
-/plugin marketplace add "$(pwd)"
-/plugin install ux-project@design-partner
-```
-
-### One-time KB indexing
-
-```
-/ux-project:setup-kb /path/to/your/KB
-```
-
-Classifies every markdown in your KB by `source_quality` and indexes into context-mode. Idempotent. If your KB layout isn't Johnny-Decimal-style, edit `QUALITY_RULES` in [`.claude-plugin/scripts/index-to-context-mode.js`](.claude-plugin/scripts/index-to-context-mode.js).
 
 ## Workflow
 
+```text
+/ux-project:setup-kb /path/to/kb
+/ux-project:start <name> <prd-path>
+/ux-project:refine
+/ux-project:add-context <name> <text-or-path>
+/ux-project:export-html
+/ux-project:handoff
 ```
-/ux-project:start <name> <prd-path>   →  create projects/<name>/ + initial KB analysis
-/ux-project:refine                    →  3-phase gated discovery
-/ux-project:onepage                   →  generate ux-onepage.md + .html
-/ux-project:handoff                   →  generate design-brief.md
-```
 
-### The 3 phases
+## Commands
 
-| Phase | What happens | Output |
-|---|---|---|
-| **Understand & Expand** | Read PRD · KB-first background scan · 5-lens scenario expansion · online behavior baseline | Scenario map · baseline memory |
-| **Evaluate & Converge** | JTBD rubric (User Value × Impl Cost × Strategic Fit) · KEEP / CUT decisions · Not Doing list | Final scenarios · JTBD list |
-| **Sharpen & Ship** | IA structure (conceptual) · interaction flow (Mermaid B&W) · cite-check · designer approval | `ux-onepage.md` + `ux-onepage.html` |
-
-Each phase ends with an explicit `AskUserQuestion` gate (Approve / Revise / Drill-down / Hold). The skill never auto-advances.
-
-## Slash commands
-
-| Command | What it does |
+| Command | Purpose |
 |---|---|
-| `/ux-project:setup-kb <kb-path>` | One-shot KB classify + index (idempotent) |
-| `/ux-project:start <name> <prd-path>` | New project from a PRD (`.md` or `.docx`) |
-| `/ux-project:resume <name>` | Switch active project by name (reads `state.md`) |
-| `/ux-project:refine` | The 3-phase gated workflow |
-| `/ux-project:add-context <name> <text-or-path>` | Append context, propose memory writes, mark onepage stale |
-| `/ux-project:onepage` | Generate `ux-onepage.md` + `.html` (cite-check + memory-status + outdated gates) |
+| `/ux-project:setup-kb <kb-path>` | Classify and index a markdown KB |
+| `/ux-project:start <name> <prd-path>` | Create `projects/<name>/`, copy the PRD, and create the initial onepage stub |
+| `/ux-project:resume <name>` | Resume from `state.md` |
+| `/ux-project:refine` | Continue the gated discovery flow and fill `ux-onepage.md` |
+| `/ux-project:add-context <name> <text-or-path>` | Add context, propose memory writes, and mark affected sections for review |
+| `/ux-project:export-html` | Render `ux-onepage.md` to `ux-onepage.html` |
 | `/ux-project:handoff` | Generate `design-brief.md` |
-| `/ux-project:update` | Upgrade the plugin from marketplace |
+| `/ux-project:update` | Refresh the installed plugin |
 
 ## Conventions
 
-**Workspace root rule.** Always run commands from the repo root (where `.claude-plugin/` lives). Never `cd projects/<name>/` — `Glob` walks down from cwd, so templates and `ux-kb-curated/` become unreachable from inside a project folder. Switch active projects by **name** via `/ux-project:resume`, never by directory.
+Always run from the repo root. Do not `cd projects/<name>/` for plugin work, because template and curated KB lookup starts from the current directory.
 
-**Lazy file creation.** Project memory grows on demand. `decisions.md / assumptions.md / questions.md / memory/*` are only created when first needed — don't pre-create them.
+Project memory is lazy-created. Do not pre-create `decisions.md`, `assumptions.md`, `questions.md`, or `memory/*`.
 
-**Cite-or-die.** Every claim in `ux-onepage.md` must have `[ref: path]`. Cite priority: PRD > KB > project memory > assumptions. Missing or stale (`status != active`) cites block onepage generation.
+The plugin never silently writes memory. It proposes entries first, then waits for explicit confirmation.
 
-**Memory write gate.** The skill never silently writes to memory files — every entry is proposed via `AskUserQuestion`, and you confirm before it's appended.
-
-Full operating principles live in [`.claude-plugin/skills/ux-discovery/SKILL.md`](.claude-plugin/skills/ux-discovery/SKILL.md).
+Every substantive claim in `ux-onepage.md` needs a source. Missing or inactive sources block close.
 
 ## Layout
 
-```
+```text
 .
-├── .claude-plugin/        # plugin code (skill + commands + templates + KB indexer)
-├── ux-kb-curated/         # shared across projects (glossary, design-principles)
-└── projects/<name>/       # one folder per requirement, lazy-created
-    ├── pm-source.md
-    ├── state.md           # resume gateway
-    ├── ux-onepage.md / .html
-    └── memory/, decisions.md, ...
+├── .claude-plugin/        # canonical Claude Code plugin source
+├── .codex-plugin/         # Codex plugin manifest
+├── commands/              # Codex slash-command adapters
+├── skills/                # Codex skill adapters
+├── ux-kb-curated/         # shared glossary, principles, preferences
+└── projects/<name>/       # project-scoped runtime files
 ```
-
-Shared across all projects: the context-mode KB index (user-global) + `ux-kb-curated/*`.
-Project-scoped: everything under `projects/<name>/`.
 
 ## License
 
-MIT — see [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json).
+MIT

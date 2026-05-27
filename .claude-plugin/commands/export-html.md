@@ -1,10 +1,10 @@
 ---
-description: ★ v0.6 — Render finalized ux-onepage.md to ux-onepage.html for the current project. Pure markdown → HTML conversion via ux-onepage.html.template (17 placeholders). Pre-condition: phase_3_confirmed_at != null in state.md. Cite-check / iteration cite-check / memory status / outdated check / draft→ref promote all happen earlier (during /ux-project:refine phase 3 confirm gate, rule 25). This command is purely mechanical.
+description: Render finalized ux-onepage.md to ux-onepage.html for the current project. Pure markdown → HTML conversion via ux-onepage.html.template (17 placeholders). Pre-condition: phase_3_confirmed_at != null in state.md. Cite-check / iteration cite-check / memory status / outdated check / draft→ref promote all happen earlier (during /ux-project:refine phase 3 confirm gate, rule 25). This command is purely mechanical.
 argument-hint: [<project-name>]  (optional; uses last active if omitted)
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
 
-You are running the `/ux-project:export-html` command (★ v0.6 — renamed from `/ux-project:onepage`). Activate the `ux-discovery` skill's principles (especially rule 25 Living Onepage).
+You are running the `/ux-project:export-html` command. Activate the `ux-discovery` skill's principles (especially rule 25 Living Onepage).
 
 ## Arguments
 
@@ -18,7 +18,7 @@ You are running the `/ux-project:export-html` command (★ v0.6 — renamed from
 - If not provided and conversation references one specific project, confirm via `AskUserQuestion`: "为 `<inferred-name>` 导 HTML 吗？"
 - If multiple projects could match, list them via `AskUserQuestion` and let designer pick.
 
-### 2. ★ v0.6 — Verify phase 3 is confirmed
+### 2. Verify phase 3 is confirmed
 
 Read `projects/<project-name>/state.md` frontmatter. Check:
 - `phase_3_confirmed_at` is set (not `null`)
@@ -27,7 +27,7 @@ Read `projects/<project-name>/state.md` frontmatter. Check:
 If not, stop with (plain Chinese, rule 22):
 > "Phase 3 还没收尾。先跑 `/ux-project:refine <project-name>` 走完三阶段，确认完 phase 3 gate 之后再来导 HTML。"
 
-### 3. ★ v0.6 — Verify no draft / assumption tags remain in ux-onepage.md
+### 3. Verify no draft / assumption tags remain in ux-onepage.md
 
 Read `projects/<project-name>/ux-onepage.md` body. Grep for `[^d` and `[^a` markers (these are draft / assumption footnote references — see rule 25).
 
@@ -52,11 +52,11 @@ Read `projects/<project-name>/ux-onepage.md` and `state.md`. Substitute placehol
 | `{{PROBLEM_FRAMING}}` | §2 现状+真正要解决的事（1–2 短句；strip cite markup） |
 | `{{PRIMARY_USER}}` / `{{SECONDARY_USERS}}` | §4 短标签 |
 | `{{BASELINE_BULLETS_HTML}}` | each active `memory/baseline.md` entry → `<li>content</li>`（**不带 sup ref**，纯文本） |
-| `{{SCENARIO_ROWS_HTML}}` | §14 rows; KEEP → `td.decision-keep`, CUT → `td.decision-cut`; lens label in `<span class="lens-tag">`（标签短到 4 字以内：时机 / 跨场景 / 用户 / 边界 / 出错）。★ v0.4.3 — iteration 项目额外一列 `<span class="change-tag change-new\|change-mod\|change-existing">★新增/改造/复用</span>` |
-| `{{IA_TREE_HTML}}` (iteration / refactor) | 节点前缀 `★NEW` 用 `<span class="ia-new">★NEW</span>`，`(改造)` 用 `<span class="ia-mod">改造</span>`，`(已有)` 用 `<span class="ia-existing">已有</span>`。★ v0.5 — CSS 已内置在模板（IKB Swiss：新增=IKB 蓝、改造=黑加粗、已有=灰）；不要在 `<style>` 里另写 |
+| `{{SCENARIO_ROWS_HTML}}` | §14 rows; KEEP → `td.decision-keep`, CUT → `td.decision-cut`; lens label in `<span class="lens-tag">`（标签短到 4 字以内：时机 / 跨场景 / 用户 / 边界 / 出错）。iteration 项目额外一列 `<span class="change-tag change-new\|change-mod\|change-existing">★新增/改造/复用</span>` |
+| `{{IA_TREE_HTML}}` (iteration / refactor) | 节点前缀 `★NEW` 用 `<span class="ia-new">★NEW</span>`，`(改造)` 用 `<span class="ia-mod">改造</span>`，`(已有)` 用 `<span class="ia-existing">已有</span>`。CSS 已内置在模板（IKB Swiss：新增=IKB 蓝、改造=黑加粗、已有=灰）；不要在 `<style>` 里另写 |
 | `{{MERMAID_FLOW_SRC}}` (iteration / refactor) | 原样保留 `classDef new / modified / existing` 定义 + 节点的 `:::class` 标注。Mermaid 自动渲染三色——HTML 端不要剥离这些标记 |
 | `{{NOT_DOING_BULLETS_HTML}}` | §15 list → `<li><b>S<n>: name</b> — reason</li>`（无 ref） |
-| `{{JTBD_CARDS_HTML}}` | §6 cards. ★ v0.5 — Primary → `<div class="jtbd-card primary">`（IKB 高亮 priority chip）；Secondary → `<div class="jtbd-card">`（中性）；Anti → `<div class="jtbd-card anti">`（灰底）。卡片 body: `<div class="id">需求 N · 核心</div><div class="text">短句, b 标签包关键动作</div><span class="priority">S1 · S3</span>`（priority chip 只放对应场景 ID，不写"对应场景："前缀） |
+| `{{JTBD_CARDS_HTML}}` | §6 cards. Primary → `<div class="jtbd-card primary">`（IKB 高亮 priority chip）；Secondary → `<div class="jtbd-card">`（中性）；Anti → `<div class="jtbd-card anti">`（灰底）。卡片 body: `<div class="id">需求 N · 核心</div><div class="text">短句, b 标签包关键动作</div><span class="priority">S1 · S3</span>`（priority chip 只放对应场景 ID，不写"对应场景："前缀） |
 | `{{IA_TREE_HTML}}` | §16 嵌套 `<ul><li>name <span class="purpose">— purpose</span></li></ul>`。purpose 文字短，≤ 20 字 |
 | `{{IA_COVERAGE_HTML}}` | `<li>需求 N → 路径</li>` 系列（短） |
 | `{{MERMAID_FLOW_SRC}}` | §17 raw mermaid source（保留 indentation；do NOT escape HTML chars inside — Mermaid handles its own parsing）。节点名要短 |
@@ -64,7 +64,7 @@ Read `projects/<project-name>/ux-onepage.md` and `state.md`. Substitute placehol
 | `{{CONSTRAINTS_BULLETS_HTML}}` | §8 top 3 constraints（每条 ≤ 25 字，无 ref） |
 | `{{ASSUMPTIONS_BULLETS_HTML}}` | §10 active assumptions top 3（每条 ≤ 25 字，无 ref） |
 | `{{OPEN_QUESTIONS_HTML}}` | §11 blocking questions（每条 ≤ 25 字，无 ref） |
-| `{{STALE_BANNER_HTML}}` | ★ v0.6 — Always empty string. Per-phase stale tracking lives in `state.md` (`stale_phase_N`); Living Onepage doesn't carry a body stale banner anymore. If any `stale_phase_N=true` and phase_3 is still confirmed, user should re-run `/ux-project:refine` to address (not block export, but warn in step 7 closing) |
+| `{{STALE_BANNER_HTML}}` | Always empty string. Per-phase stale tracking lives in `state.md` (`stale_phase_N`); Living Onepage doesn't carry a body stale banner anymore. If any `stale_phase_N=true` and phase_3 is still confirmed, user should re-run `/ux-project:refine` to address (not block export, but warn in step 7 closing) |
 
 **Tightening guidelines** (apply when filling placeholders):
 - 删掉所有"这样 / 这是 / 这一节"等指代废话
@@ -120,11 +120,11 @@ Then:
 
 ## What NOT to do
 
-- ★ v0.6 — **Don't run cite-check / iteration cite-check / memory status check / outdated check / closure readiness check here.** Those are phase 3 confirm gate's job in `/ux-project:refine` (rule 25). Moving them here would duplicate work and reintroduce the v0.2-v0.5 "all-or-nothing at end" pattern that v0.6 replaces.
-- ★ v0.6 — **Don't promote `[^d]` / `[^a]` tags here.** Same as above — that's phase 3 confirm gate's job.
-- ★ v0.6 — **Don't generate or modify `ux-onepage.md` content.** This command ONLY renders the existing .md to .html. The .md is now the source-of-truth Living Onepage, edited only during `/ux-project:refine` phases.
+- **Don't run cite-check / iteration cite-check / memory status check / outdated check / closure readiness check here.** Those are phase 3 confirm gate's job in `/ux-project:refine` (rule 25). Moving them here would duplicate work and reintroduce end-only validation.
+- **Don't promote `[^d]` / `[^a]` tags here.** Same as above — that's phase 3 confirm gate's job.
+- **Don't generate or modify `ux-onepage.md` content.** This command ONLY renders the existing `.md` to `.html`. The `.md` is now the source-of-truth Living Onepage, edited only during `/ux-project:refine` phases.
 - Don't include UI controls / colors / unsupported syntax in Mermaid output.
 - Don't include header meta row (PRD version / generated date / regen count) or phase confirmation strip in HTML output (rule 22).
 - Don't render `<sup class="ref">`, `<div class="footnotes">`, `<span class="phase-tag">`, `<p class="lede">` in HTML body (rule 22).
 - Don't escape HTML chars inside `{{MERMAID_FLOW_SRC}}` — Mermaid parses raw text inside `<pre class="mermaid">`.
-- Don't update `state.md` `phase` field (e.g., to `onepage-generated`). That legacy state value was a v0.2-v0.5 concept; v0.6 leaves `phase: ready_for_onepage` after phase 3 confirm and never advances further from this command.
+- Don't update `state.md` `phase` field (e.g., to `onepage-generated`). Leave `phase: ready_for_onepage` after phase 3 confirm and never advance it from this command.

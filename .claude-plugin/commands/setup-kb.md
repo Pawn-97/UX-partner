@@ -75,7 +75,7 @@ KB classification:
 Total: <n> markdown files
 ```
 
-If `UNCATEGORIZED` is non-zero, list the file paths. **★ v0.3 — fire `AskUserQuestion`** (SKILL.md § Question UI contract):
+If `UNCATEGORIZED` is non-zero, list the file paths. **fire `AskUserQuestion`** (SKILL.md § Question UI contract):
 
 ```
 AskUserQuestion({
@@ -98,7 +98,7 @@ Show plain-text stats:
 - 幂等: 重复跑不会重复入库（ctx_index 用内容哈希去重）
 ```
 
-**★ v0.3 — Then fire `AskUserQuestion`** (SKILL.md § Question UI contract):
+**Then fire `AskUserQuestion`** (SKILL.md § Question UI contract):
 
 ```
 AskUserQuestion({
@@ -143,7 +143,7 @@ mcp__plugin_context-mode_context-mode__ctx_index({
 
 **Process in batches of 50** to make progress visible. After each batch, print:
 ```
-Indexed <50*n>/<total> ...
+Indexed <50*n>/<total>...
 ```
 
 If any single ctx_index call fails (returns error), log the path + error to a list but **continue with the rest**. Don't let one bad file abort the whole batch.

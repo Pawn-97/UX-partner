@@ -1,7 +1,7 @@
 {
   "name": "ux-project",
-  "version": "0.6.0",
-  "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage (md + HTML 一图流) through a 3-phase gated workflow on a Living Onepage. v0.6 — Living Onepage (rule 25): /ux-project:start 立即 stub ux-onepage.md，每个 phase 增量填充对应 section group；Phase 1 微流程改为 PRD 一句话总结 + 3 JTBD scenarios + sharpening qs（含 context 题）；Phase 3 confirm gate 内嵌 cite-check + draft→ref promote；/ux-project:onepage 重命名为 /ux-project:export-html（纯 .md→.html）；state.md stale 改为 phase 级（stale_phase_1/2/3）。保留 v0.4-v0.5 所有：三阶段 gate、场景扩展、JTBD rubric、baseline memory、IA + 交互流程、IKB Swiss visual、cite-or-die、AskUserQuestion UI。Does NOT generate hi-fi UI, Figma artifacts — those remain downstream.",
+  "version": "0.6.1",
+  "description": "UX discovery partner for designers — turn raw PM PRDs into KB-grounded ux-onepage.md, stakeholder HTML onepagers, and design briefs. Keeps discovery upstream of hi-fi UI and Figma work, requires explicit designer approval at each decision point, and preserves project memory under projects/<name>/.",
   "author": {
     "name": "GuanchengDing"
   },

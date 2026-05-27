@@ -1,5 +1,5 @@
 ---
-description: Initialize a UX discovery project from a PRD path (.md or .docx). Creates projects/<name>/ workspace, converts DOCX via pandoc if needed (preserves embedded images to pm-source-assets/), copies PRD with version frontmatter, runs initial KB analysis, outputs a < 200-char structured task summary, and waits for designer confirm before writing state.md.
+description: Initialize a UX discovery project from a PRD path (.md or .docx). Creates projects/<name>/ workspace, converts DOCX via pandoc if needed (preserves embedded images to pm-source-assets/), copies PRD with source frontmatter, runs initial KB analysis, outputs a < 200-char structured task summary, and waits for designer confirm before writing state.md.
 argument-hint: <project-name> <prd-file-path>
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
@@ -19,10 +19,10 @@ If arguments are missing or malformed, ask the designer to provide them in this 
 ### 1. Validate inputs
 
 - Check the PRD path exists.
-- Check the extension is `.md` or `.docx` (case-insensitive). Other formats → **stop** and tell the designer: "目前只支持 .md 和 .docx。.pdf / .pptx 等转成 docx 或 md 后再来。"
+- Check the extension is `.md` or `.docx` (case-insensitive). Other formats → **stop** and tell the designer: "目前只支持 .md 和 .docx。.pdf /.pptx 等转成 docx 或 md 后再来。"
 - Check `projects/<project-name>/` does NOT already exist. If it does, ask: "项目 `<name>` 已存在。要 `/ux-project:resume <name>` 接着用，还是用别的名字开新项目？"
 
-### 1b. ★ v0.4.4 — DOCX → MD conversion（仅当 input 是 .docx）
+### 1b. DOCX → MD conversion（仅当 input 是 .docx）
 
 If the input file ends with `.docx`:
 
@@ -31,7 +31,7 @@ If the input file ends with `.docx`:
    which pandoc
    ```
    If exit non-zero, surface plainly (rule 22):
-   > "你给的是 .docx，需要 pandoc 帮我转成 markdown。装一下：`brew install pandoc`（macOS）/ `apt install pandoc`（Linux）/ `choco install pandoc`（Windows），然后重跑 /ux-project:start。"
+   > "你给的是.docx，需要 pandoc 帮我转成 markdown。装一下：`brew install pandoc`（macOS）/ `apt install pandoc`（Linux）/ `choco install pandoc`（Windows），然后重跑 /ux-project:start。"
 
    Then **stop**.
 
@@ -92,7 +92,7 @@ Then write `projects/<project-name>/pm-source.md`:
 
 - Use `pm-source.template.md` as the frontmatter shape.
 - Set `project: <project-name>`, `prd_version: v1`, `valid_from: <today YYYY-MM-DD>`, `valid_to: null`, `superseded_by: null`.
-- ★ v0.4.4 — DOCX 路径多加一个 frontmatter 字段：`source_format: docx`，`source_file: <原始 docx 路径>`，`assets_dir: ./pm-source-assets`。MD 路径不加这几个字段（保持兼容）。
+- DOCX 路径多加一个 frontmatter 字段：`source_format: docx`，`source_file: <原始 docx 路径>`，`assets_dir: ./pm-source-assets`。MD 路径不加这几个字段（保持兼容）。
 - Append the body content (from MD source OR from step 1b's converted body) verbatim under the frontmatter.
 
 **Cleanup**: 如果走了 DOCX 路径，删掉临时文件 `.pm-source.body.md`：
@@ -113,7 +113,7 @@ Write `projects/<project-name>/state.md` from `state.template.md`:
 - Leave `Current Understanding` empty for now (will fill in step 8 after designer confirms the summary).
 - Leave `Memory Index` empty (no memory entries yet).
 
-### 4b. ★ v0.6 — Initialize ux-onepage.md stub (Living Onepage)
+### 4b. Initialize ux-onepage.md stub (Living Onepage)
 
 Locate template via Glob: `**/.claude-plugin/templates/ux-onepage.template.md`.
 
@@ -138,7 +138,7 @@ Extract 3–5 top keywords from the PRD title + first headings. Run `ctx_search`
 
 Use the source-quality prefix tags (`[PRODUCT-DOC]`, `[TEMPLATE]`, etc.) to weight relevance.
 
-### 6. ★ v0.2 — Output structured task summary (< 200 chars) + 3–5 questions
+### 6. Output structured task summary (< 200 chars) + 3–5 questions
 
 Output this structure to the designer **exactly**:
 
@@ -153,11 +153,11 @@ Output this structure to the designer **exactly**:
 
 ```
 
-★ v0.6 — The `## Relevant KB context` subsection that previously appeared here has been **removed** per rule 25. The KB sweep from step 5 still runs internally; its results stay implicit in the 5-bullet summary above. Do NOT echo "found in zoomkb wiki..." / "related KB context..." / similar — designer doesn't care about the retrieval process.
+The `## Relevant KB context` subsection that previously appeared here has been **removed** per rule 25. The KB sweep from step 5 still runs internally; its results stay implicit in the 5-bullet summary above. Do NOT echo "found in zoomkb wiki..." / "related KB context..." / similar — designer doesn't care about the retrieval process.
 
 **Strictly enforce the < 200-char cap on the 5 bullet lines combined.** If you cannot fit, drop "可能的 solution bias" first (it's the easiest to discuss in round 1 instead).
 
-**After printing the summary**, immediately invoke `AskUserQuestion` (★ v0.3 — see SKILL.md § Question UI contract) for the confirm gate:
+**After printing the summary**, immediately invoke `AskUserQuestion` (see SKILL.md § Question UI contract) for the confirm gate:
 
 ```
 AskUserQuestion({
@@ -171,7 +171,7 @@ AskUserQuestion({
 })
 ```
 
-### 7. ★ v0.2 / v0.3 — Handle confirm/edit/reject from the picker
+### 7. /  — Handle confirm/edit/reject from the picker
 
 **Do NOT write to state.md yet.** Branch on the `AskUserQuestion` result:
 
@@ -198,12 +198,12 @@ Print plain-text closing message:
 文件位置：`projects/<project-name>/`
 - pm-source.md (PRD v1, valid_from <today>)
 - state.md (phase: intake, auto_propose: true/batched)
-- ux-onepage.md ★ v0.6 (空 stub，3 个 phase 分组，会随 `/ux-project:refine` 逐步填充)
+- ux-onepage.md (空 stub，3 个 phase 分组，会随 `/ux-project:refine` 逐步填充)
 
 下一步：先回答下面 3–5 个 round-1 问题；或 `/ux-project:refine <project-name>` 进入三阶段打磨流程；或 `/ux-project:resume <project-name>` 查看状态；或 `/ux-project:add-context <text|path>` 补背景。
 ```
 
-**★ v0.3 — Then immediately fire the 3–5 round-1 questions, ONE `AskUserQuestion` per question.** Each call:
+**Then immediately fire the 3–5 round-1 questions, ONE `AskUserQuestion` per question.** Each call:
 
 ```
 AskUserQuestion({
@@ -223,9 +223,9 @@ Plausible options come from your PRD analysis + KB context — they're hypothesi
 
 - PRD path doesn't exist → stop, ask for correction.
 - PRD extension is not `.md` / `.docx` → stop, ask designer to convert first.
-- ★ v0.4.4 — DOCX 输入但 pandoc 未装 → 给装机命令，停下。
-- ★ v0.4.4 — pandoc 转换失败（退出码非零） → 显示 stderr 末尾，建议换 .md 重来。
-- ★ v0.4.4 — pandoc 转出来内容为空 → 报警 + 建议检查源 docx。
+- DOCX 输入但 pandoc 未装 → 给装机命令，停下。
+- pandoc 转换失败（退出码非零） → 显示 stderr 末尾，建议换 .md 重来。
+- pandoc 转出来内容为空 → 报警 + 建议检查源 docx。
 - PRD is empty or 1 line → stop, suggest the designer paste actual PRD content.
 - `projects/` directory can't be created → check working directory, surface path issue.
 - `ctx_search` returns nothing useful → continue without KB facts; flag in chat as "KB 未命中相关条目，本次分析仅靠 PRD 内容"。

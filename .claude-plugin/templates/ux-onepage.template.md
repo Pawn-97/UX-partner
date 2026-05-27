@@ -13,26 +13,26 @@ change_type: <new_feature | iteration | refactor>
 ---
 
 <!--
-v0.6 Living Onepage 内部说明（agent 用，designer 不需要读）。
+ Living Onepage 内部说明（agent 用，designer 不需要读）。
 
-★ v0.6 — Phase-group layout:
+Phase-group layout:
 - 本文件由 /ux-project:start 生成空 stub，每个 phase 增量填充各自的区块；agent 永不自动改 prior phase 内容（rule 25）。
 - Phase 1 填：PRD 一句话总结、Final Goal、Problem Framing、PM ask vs Interpreted、Target Users、User Behaviors、用户场景、Scenario Map（§14）
 - Phase 2 填：JTBD（§6）、Constraints、Decisions、Assumptions、Open Questions、Design Direction、Not Doing（§15）
 - Phase 3 填：Handoff Notes、IA、Interaction Flow
 
-★ v0.6 — Cite 信息（rule 3 cite-or-die 的 v0.6 重新解读）:
+Cite 信息:
 - 本文件 body 绝**不**出现 `[ref: ...]` / `[^d<n>]` / `[^a<n>]` 这类 designer 可见的 ref 标记。Onepage 是给设计师/评审看的产物，干净 prose 即可。
 - Agent 在 reasoning 时**内部**知道每条 claim 的来源（PRD / KB / memory）—— 通过 conversation context 维持，不持久化到本文件。
-- Phase 3 confirm gate 时跑 cite-check：agent 重新对照每条 substantive claim 与 PRD / KB / memory，作为一张 claim ↔ source 表呈给设计师逐条 approve；approve 通过的 source 写到 decisions.md / assumptions.md（已有 v0.1 文件，带内部 D / A id）—— 不进 onepage。
+- Phase 3 confirm gate 时跑 cite-check：agent 重新对照每条 substantive claim 与 PRD / KB / memory，作为一张 claim ↔ source 表呈给设计师逐条 approve；approve 通过的 source 写到 decisions.md / assumptions.md（已有文件，带内部 D / A id）—— 不进 onepage。
 - 没找到 source 的 claim → 设计师选：补 source / 改为 assumption / 删除。
 
-★ v0.6 — Stale 处理:
-- 全文级 stale / stale_reason 字段已**移除**（v0.6 supersedes v0.2-v0.5）。
+Stale 处理:
+- 全文级 stale / stale_reason 字段已**移除**。
 - 改为 state.md frontmatter 的 stale_phase_1 / stale_phase_2 / stale_phase_3 三个 boolean。
 - /ux-project:add-context 命中影响 phase 时 set 对应 stale_phase_N=true，由设计师在下次 /ux-project:refine 决定是否 re-walk。
 
-★ v0.6 — HTML companion:
+HTML companion:
 - /ux-project:export-html 渲染本文件为 ux-onepage.html，要求 phase_3_confirmed_at != null。
 - HTML 同样不展示任何 ref 信息。
 -->
@@ -116,13 +116,13 @@ v0.6 Living Onepage 内部说明（agent 用，designer 不需要读）。
 
 ### 6. JTBD
 
-> Phase 1+2 讨论后从 KEEP 场景距出来的 user jobs。Primary 是核心驱动需求；Secondary 是细化/辅助；Anti-JTBD 是用户明确不想要的状态。
+> Phase 1+2 讨论后从 KEEP 场景沉淀出来的 user jobs。Primary 是核心驱动需求；Secondary 是细化/辅助；Anti-JTBD 是用户明确不想要的状态。
 
 #### Primary
 When <situation>, I want to <action>, so I can <outcome>.
 
 #### Secondary
-When ..., I want ..., so ...
+When ..., I want ..., so...
 
 #### Anti-JTBD
 The user does NOT want to <unwanted state>.

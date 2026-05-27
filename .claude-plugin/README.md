@@ -1,143 +1,64 @@
 # UX Project — Claude Code Plugin
 
-UX discovery partner for designers. Turns a raw PM PRD into a KB-grounded `ux-onepage.md` and `design-brief.md` through multi-round discovery, with project-level memory and cite-or-die enforcement.
+This directory is the canonical Claude Code plugin source for UX Partner. Codex uses adapter files at the repository root, but those adapters point back here so the workflow stays in one place.
 
-**Does NOT generate UI / wireframes / Figma.** That's downstream — handed off to `huashu-design` / `frontend-design` / Figma skills.
+## What It Does
 
-## Installation
+UX Partner turns a PM PRD into:
 
-### Marketplace (recommended)
+- `ux-onepage.md`
+- `ux-onepage.html`
+- `design-brief.md`
+- project-scoped memory under `projects/<name>/`
 
-Start `claude` first (these are **slash commands run inside the REPL**, not shell commands):
+It stays upstream of hi-fi UI, Figma, and frontend code.
 
-```
+## Install
+
+Inside Claude Code:
+
+```text
 /plugin marketplace add Pawn-97/UX-partner
 /plugin install ux-project@design-partner
 ```
 
-For project-scoped install (only enabled in one folder):
+Then reload plugins or restart Claude Code.
 
-```bash
-cd /path/to/your/project
-claude
-```
-then in the REPL:
-```
-/plugin install ux-project@design-partner --scope project
-```
-
-### Local Clone (for development)
-
-```bash
-git clone git@github.com:Pawn-97/UX-partner.git
-cd UX-partner
-claude
-```
-then in the REPL:
-```
-/plugin marketplace add "$(pwd)"
-/plugin install ux-project@design-partner
-```
-
-After install, run `/reload-plugins` (or restart `claude`). The skill auto-triggers on UX-discovery keywords; the slash commands appear under `/ux-project:*`.
-
-## Slash Commands
+## Commands
 
 | Command | Purpose |
 |---|---|
-| `/ux-project:setup-kb <kb-path>` | One-shot KB setup: classify + index every markdown file into context-mode (idempotent) |
-| `/ux-project:start <project-name> <prd-path>` | Initialize project workspace, copy PRD, run KB analysis, **★ v0.6 — stub empty ux-onepage.md** |
-| `/ux-project:resume <project-name>` | Restore project context from `state.md` (gateway file) |
-| `/ux-project:refine [<project-name>]` | ★ v0.6 — Run the 3-phase gated workflow on the Living Onepage. Phase 1 writes PRD 一句话总结 + 3 JTBD scenarios; Phase 2 writes constraints/decisions/not-doing; Phase 3 writes IA/flow/handoff. Phase 3 confirm gate runs cite-check + draft→ref promote inline (rule 25) |
-| `/ux-project:add-context <project-name> <text-or-path>` | ★ v0.2 / v0.6 — Append context, classify, propose memory writes, mark per-phase stale flags (`stale_phase_N`) on state.md |
-| `/ux-project:export-html [<project-name>]` | ★ v0.6 (renamed from `/ux-project:onepage`) — Render finalized ux-onepage.md to HTML 一图流. Pre-condition: `phase_3_confirmed_at != null` |
-| `/ux-project:handoff` | Generate `design-brief.md` for downstream design skills (requires phase 3 confirmed) |
+| `/ux-project:setup-kb <kb-path>` | Classify and index a markdown KB |
+| `/ux-project:start <project-name> <prd-path>` | Create the project workspace, copy the PRD, and create the initial onepage stub |
+| `/ux-project:resume <project-name>` | Restore project context from `state.md` |
+| `/ux-project:refine [<project-name>]` | Continue discovery and fill the living onepage |
+| `/ux-project:add-context <project-name> <text-or-path>` | Add context, propose memory writes, and mark affected sections for review |
+| `/ux-project:export-html [<project-name>]` | Render the confirmed markdown onepage to HTML |
+| `/ux-project:handoff [<project-name>]` | Generate the downstream design brief |
+| `/ux-project:update` | Refresh the installed plugin |
 
-## How It's Triggered
+## Canonical Files
 
-The bundled `ux-discovery` skill auto-activates when you mention: "ux discovery", "需求拆解", "需求理解", "JTBD 梳理", "PRD 分析", "ux-onepage", "design brief", or invoke any `/ux-project:*` command.
-
-## Operating Principles (enforced)
-
-1. PRD is the entry. Always read it first.
-2. Don't jump to solutions. Reframe before discussing UI.
-3. **Cite or die.** Every onepage claim must have `[ref: path]` to a source.
-4. **Outdated source detection.** PRD `valid_to < today` → warning before close.
-5. Designer is the final judge. LLM recommends closure; designer confirms.
-6. Lazy file creation. Project memory grows on demand.
-7. Use `ctx_search` before reading. KB is large; never bulk-load.
-8. Each round = 3–5 focused questions, with WHY each matters.
-9. Memory write rule: never silently write decisions/assumptions/questions/memory/* — always show the proposed entry first and ask "记入吗？"
-
-### ★ v0.2 additions
-
-10. **First response is structured understanding.** `/ux-project:start` outputs a < 200-char structured task summary; designer confirms before it's written to `state.md`.
-11. **Continuous context absorption.** `/ux-project:add-context` + auto-propose batched (every 5 rounds) write project memory; designer confirms each entry.
-12. **Citation priority**: PRD > KB > project memory > assumptions. Memory cites must have `status: active`.
-13. **Stale ≠ invalid.** New context marks `ux-onepage.md` stale; designer triggers regen.
-14. **PRD upgrade default lazy** with hybrid prompt ("现在 review / 稍后").
-15. **state.md size cap**: body ≤ 30 lines / < 1k tokens; oldest Memory Index entries demote on overflow.
-16. **Read-triggered propose**: when reading any memory file mid-discussion, internally check for needed updates.
-
-### ★ v0.3 additions
-
-17. **UI-first questioning.** Every designer-facing question — confirm gates, the 3–5 round questions, memory-type classification, project selection, closure decisions, diff approval — is delivered via Claude Code's `AskUserQuestion` structured picker, not plain text. Each call provides 2–5 labelled options + an "Other" free-text fallback. Plain text is reserved for narration, summaries, and error reports.
-
-## Files & Layout
-
-```
-Design-partner/                ← workspace root (A); cd here, run all commands here
-  .claude-plugin/
-    plugin.json
-    marketplace.json
-    README.md                  ← you are here
-    skills/ux-discovery/SKILL.md
-    commands/
-      setup-kb.md              → /ux-project:setup-kb
-      start.md                 → /ux-project:start (★ v0.6 — stubs ux-onepage.md)
-      resume.md                → /ux-project:resume
-      refine.md                → /ux-project:refine  (★ v0.4 / v0.6 — 3-phase gated, Living Onepage)
-      add-context.md           → /ux-project:add-context  (★ v0.2 / v0.6 stale_phase_N)
-      export-html.md           → /ux-project:export-html  (★ v0.6 — renamed from /ux-project:onepage; .md→.html only)
-      handoff.md               → /ux-project:handoff
-      update.md                → /ux-project:update
-    templates/                 (13 templates: pm-source/state/decisions/assumptions/questions/ux-onepage/design-brief
-                               + ★ v0.2: memory-stakeholders/memory-constraints/memory-terminology/memory-history/memory-preferences/background)
-    scripts/
-      index-to-context-mode.js ← KB indexing helper
-  ux-kb-curated/
-    glossary.md                ← user-curated, shared by all projects, < 100 lines
-    design-principles.md       ← user-curated, shared by all projects, < 100 lines
-    designer-preferences.md    ← ★ v0.2 — cross-project designer prefs (Always-on / On-demand)
-  projects/
-    <project-name>/            ← runtime workspace, lazy-created per project
-      pm-source.md             PRD + frontmatter (read-only)
-      state.md                 resume gateway (≤ 30 body lines)
-      decisions.md / assumptions.md / questions.md   (lazy discussion log)
-      ux-onepage.md            final deliverable + stale flag
-      design-brief.md          downstream handoff
-      background.md            ★ v0.2 — append-only raw context audit trail
-      memory/                  ★ v0.2 — context-memory by type
-        stakeholders.md / constraints.md / terminology.md / history.md / preferences.md
+```text
+.claude-plugin/
+  plugin.json
+  marketplace.json
+  skills/ux-discovery/SKILL.md
+  commands/
+  templates/
+  scripts/index-to-context-mode.js
+  vendor/guizang-ppt-skill/
 ```
 
-## Workspace Rules
+## Rules To Preserve
 
-**Cwd rule**: always work from the workspace root (`A`). Never `cd projects/<name>/` and run commands there — Glob lookups for `.claude-plugin/templates/` and `ux-kb-curated/` walk DOWN from cwd, not up, so they fail from a project subfolder. Switch active project by **name** via `/ux-project:resume <name>`, not by changing directory.
-
-**Shared automatically**: KB index (context-mode user-global), `ux-kb-curated/glossary.md`, `ux-kb-curated/design-principles.md`, `ux-kb-curated/designer-preferences.md` (★ v0.2 — Always-on tier always loaded).
-
-**Not shared**: `decisions.md`, `assumptions.md`, `questions.md`, `state.md`, `pm-source.md`, `ux-onepage.md`, `design-brief.md`, `background.md` (★ v0.2), `memory/*.md` (★ v0.2) — all project-scoped. To make a decision universal, manually copy it into `ux-kb-curated/design-principles.md` (the skill does NOT auto-promote). For preferences seen in ≥ 2 projects, the skill MAY propose promotion to `ux-kb-curated/designer-preferences.md`; designer confirms.
-
-See the root [README.md](../README.md) for the full Workspace Organization section with examples.
-
-## KB Setup (one-time)
-
-Before the first project, index your existing KB into context-mode:
-
-```bash
-node "/Users/GuanchengDing/Claude Code-works/AI-projects/Design-partner/.claude-plugin/scripts/index-to-context-mode.js" \
-  "/Users/GuanchengDing/Phone-KnowledgeBase/Phone- KnowledgeBase"
-```
-
-Then seed `ux-kb-curated/glossary.md` and `ux-kb-curated/design-principles.md` with the project's anchor terms and principles (ask the skill to draft a candidate from your KB).
+- PRD first.
+- Reframe the problem before UI talk.
+- Use `ctx_search` before reading large KB sources.
+- Ask 3-5 focused questions per round.
+- Never silently write memory, decisions, assumptions, or questions.
+- Do not advance through approval points without explicit designer confirmation.
+- Keep `state.md` small and use it as the resume gateway.
+- Keep citations complete in `ux-onepage.md`.
+- Render HTML only from the existing markdown onepage.
+- Do not produce hi-fi UI, Figma files, or frontend code.
