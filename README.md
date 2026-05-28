@@ -6,7 +6,7 @@ UX Partner turns a raw PM PRD into KB-grounded UX discovery files:
 - `ux-onepage.html` — clean stakeholder onepager
 - `design-brief.md` — handoff for downstream UI, Figma, or frontend work
 
-It supports both Claude Code and Codex. The Claude Code plugin remains the canonical source under `.claude-plugin/`; Codex uses a thin adapter under `.codex-plugin/`, `skills/`, and `commands/`.
+It supports Claude Code, Codex, and Cursor. The Claude Code plugin remains the canonical source under `.claude-plugin/`; Codex and Cursor use thin adapters that point back to the same rules.
 
 **English** · [中文](README_CN.md)
 
@@ -44,6 +44,28 @@ cd Design-partner
 codex plugin marketplace add "$(pwd)"
 codex plugin add ux-project@design-partner
 ```
+
+## Use In Cursor
+
+Open this repository in Cursor. The project skill at `.cursor/skills/ux-discovery/SKILL.md` makes Cursor Agent recognize the same workflow.
+
+```bash
+git clone git@github.com:Pawn-97/UX-partner.git Design-partner
+cd Design-partner
+cursor .
+```
+
+Then type the same command-like prompts in Cursor chat:
+
+```text
+/ux-project:setup-kb /path/to/kb
+/ux-project:start <name> <prd-path>
+/ux-project:refine
+```
+
+Cursor slash commands are provided under `.cursor/commands/`, so they should appear in the `/` menu when the repository is open in Cursor. The command files are thin adapters: they load the Cursor skill, then read the matching canonical command file and map Claude/Codex tool behavior to Cursor tools.
+
+For KB search, Cursor uses context-mode tools when available. If they are not available, the adapter falls back to the local scripts in `.claude-plugin/scripts/local-kb-index.js` and `.claude-plugin/scripts/local-kb-search.js`, so the workflow can still search indexed KB chunks without bulk-loading the KB into chat.
 
 ## Workflow
 
@@ -85,6 +107,7 @@ Every substantive claim in `ux-onepage.md` needs a source. Missing or inactive s
 .
 ├── .claude-plugin/        # canonical Claude Code plugin source
 ├── .codex-plugin/         # Codex plugin manifest
+├── .cursor/               # Cursor slash commands, project skill, and rules
 ├── commands/              # Codex slash-command adapters
 ├── skills/                # Codex skill adapters
 ├── ux-kb-curated/         # shared glossary, principles, preferences

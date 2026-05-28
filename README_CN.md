@@ -6,7 +6,7 @@ UX Partner 把 PM 的原始 PRD 转成有来源依据的 UX discovery 文件：
 - `ux-onepage.html`：给 stakeholder 看的网页一图流
 - `design-brief.md`：交给下游 UI、Figma 或前端实现的简报
 
-这个仓库同时支持 Claude Code 和 Codex。`.claude-plugin/` 是原有 Claude Code 插件源；`.codex-plugin/`、`skills/`、`commands/` 是 Codex 兼容入口，不复制业务规则。
+这个仓库同时支持 Claude Code、Codex 和 Cursor。`.claude-plugin/` 是原有 Claude Code 插件源；Codex 和 Cursor 都只做薄适配，不复制业务规则。
 
 [English](README.md) · **中文**
 
@@ -44,6 +44,28 @@ cd Design-partner
 codex plugin marketplace add "$(pwd)"
 codex plugin add ux-project@design-partner
 ```
+
+## Cursor 使用
+
+在 Cursor 里打开这个仓库。`.cursor/skills/ux-discovery/SKILL.md` 会让 Cursor Agent 识别同一套流程。
+
+```bash
+git clone git@github.com:Pawn-97/UX-partner.git Design-partner
+cd Design-partner
+cursor .
+```
+
+然后在 Cursor chat 里直接输入同样的命令式文本：
+
+```text
+/ux-project:setup-kb /path/to/kb
+/ux-project:start <name> <prd-path>
+/ux-project:refine
+```
+
+Cursor slash command 放在 `.cursor/commands/` 下；用 Cursor 打开仓库后，理论上会出现在 `/` 菜单里。这些命令文件只是薄入口：先加载 Cursor skill，再读取对应的 canonical command 文件，并把 Claude/Codex 工具行为映射到 Cursor 工具。
+
+KB 搜索优先用 context-mode 工具；如果 Cursor 当前没有这些工具，就会退到 `.claude-plugin/scripts/local-kb-index.js` 和 `.claude-plugin/scripts/local-kb-search.js`，仍然按索引后的 chunk 搜索，不把整套 KB 塞进对话。
 
 ## 工作流
 
@@ -85,6 +107,7 @@ codex plugin add ux-project@design-partner
 .
 ├── .claude-plugin/        # Claude Code 插件源
 ├── .codex-plugin/         # Codex manifest
+├── .cursor/               # Cursor slash commands、项目 skill 和规则
 ├── commands/              # Codex slash command 入口
 ├── skills/                # Codex skill 入口
 ├── ux-kb-curated/         # 共享词表、设计原则、偏好

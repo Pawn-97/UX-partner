@@ -1,0 +1,20 @@
+---
+description: UX Partner repository architecture and Cursor adapter rules
+alwaysApply: true
+---
+
+# UX Partner
+
+- `.claude-plugin/` is the canonical source for workflow rules, command procedures, templates, and scripts.
+- `.codex-plugin/`, root `skills/`, and root `commands/` are Codex adapters.
+- `.cursor/commands/*.md` are Cursor slash commands. They should stay thin and point to the Cursor skill plus the matching canonical command.
+- `.cursor/skills/ux-discovery/SKILL.md` is the Cursor skill adapter. Keep it thin; do not copy canonical workflow rules into Cursor files.
+- Edit `.claude-plugin/skills/ux-discovery/SKILL.md` for behavior changes.
+- Edit `.claude-plugin/commands/*.md` for command procedure changes.
+- Cursor should expose `/ux-project:*` through `.cursor/commands/*.md`; if a user types the command as plain chat text, treat it as the same invocation.
+- Map `AskUserQuestion` to Cursor `AskQuestion`; include an "其他，我补充" option when the canonical flow expects free text.
+- Prefer context-mode `ctx_search` and `ctx_index` for large KB work. If unavailable in Cursor, use `.claude-plugin/scripts/local-kb-index.js` and `.claude-plugin/scripts/local-kb-search.js`; never bulk-read the KB.
+- Always run workflows from the repository root, not from `projects/<name>/`.
+- Do not silently write memory, decisions, assumptions, or questions.
+- Do not generate hi-fi UI, Figma artifacts, visual design, or frontend code.
+- Keep `.cursor/commands/`, `.cursor/skills/`, and `.cursor/rules/` tracked; keep local Cursor settings/state out of git.

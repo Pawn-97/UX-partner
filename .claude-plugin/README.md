@@ -1,6 +1,6 @@
 # UX Project — Claude Code Plugin
 
-This directory is the canonical Claude Code plugin source for UX Partner. Codex uses adapter files at the repository root, but those adapters point back here so the workflow stays in one place.
+This directory is the canonical Claude Code plugin source for UX Partner. Codex and Cursor use adapter files outside this directory, but those adapters point back here so the workflow stays in one place.
 
 ## What It Does
 
@@ -47,7 +47,20 @@ Then reload plugins or restart Claude Code.
   commands/
   templates/
   scripts/index-to-context-mode.js
+  scripts/local-kb-index.js
+  scripts/local-kb-search.js
   vendor/guizang-ppt-skill/
+```
+
+Adapters outside this directory:
+
+```text
+.codex-plugin/plugin.json
+skills/ux-discovery/SKILL.md
+commands/ux-project:*.md
+.cursor/commands/ux-project:*.md
+.cursor/skills/ux-discovery/SKILL.md
+.cursor/rules/ux-partner.mdc
 ```
 
 ## Rules To Preserve

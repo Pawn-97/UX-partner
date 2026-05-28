@@ -8,6 +8,7 @@
 # Generated KB index artifacts (user-specific paths, regeneratable)
 /kb-classification.md
 /kb-index-manifest.json
+/.kb-local-index.json
 /.kb-setup-stamp
 
 # Editor / IDE
@@ -15,7 +16,15 @@
 .idea/
 *.swp
 *.swo
-.cursor/
+
+# Cursor: commit project adapter skills/rules, ignore local settings/state
+.cursor/*
+!.cursor/skills/
+!.cursor/skills/**
+!.cursor/commands/
+!.cursor/commands/**
+!.cursor/rules/
+!.cursor/rules/**
 
 # Node
 node_modules/

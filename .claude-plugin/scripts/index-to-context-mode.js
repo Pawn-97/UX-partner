@@ -26,6 +26,10 @@
 //   Claude will read the manifest, walk the entries, and call the
 //   mcp__plugin_context-mode_context-mode__ctx_index tool with each file's
 //   path + quality-tagged source label.
+//
+// Cursor fallback:
+//   node .claude-plugin/scripts/local-kb-index.js kb-index-manifest.json
+//   node .claude-plugin/scripts/local-kb-search.js "<query>" 5
 
 const fs = require('fs');
 const path = require('path');
@@ -220,6 +224,13 @@ function main() {
   reportLines.push('');
   reportLines.push('Claude will read the manifest and call the `mcp__plugin_context-mode_context-mode__ctx_index` tool for each file. ctx_index uses content hashes, so re-indexing unchanged files is a no-op.');
   reportLines.push('');
+  reportLines.push('Cursor fallback when context-mode is unavailable:');
+  reportLines.push('');
+  reportLines.push('```bash');
+  reportLines.push('node .claude-plugin/scripts/local-kb-index.js kb-index-manifest.json');
+  reportLines.push('node .claude-plugin/scripts/local-kb-search.js "<query>" 5');
+  reportLines.push('```');
+  reportLines.push('');
 
   const reportPath = path.join(outputDir, 'kb-classification.md');
   fs.writeFileSync(reportPath, reportLines.join('\n'));
@@ -242,6 +253,7 @@ function main() {
   }
   console.log('');
   console.log('Next: ask Claude to read kb-index-manifest.json and index each entry via ctx_index.');
+  console.log('Cursor fallback: node .claude-plugin/scripts/local-kb-index.js kb-index-manifest.json');
 }
 
 main();
